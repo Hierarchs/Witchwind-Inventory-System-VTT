@@ -53,8 +53,8 @@
  * so these overrides are declared at each of those levels too; otherwise dnd5e's values sit closer to
  * the content and win (that's what kept the blue ability badges and dark frames).
  */
-.dnd5e2.sheet.actor.ww-theme,
-.dnd5e2.sheet.actor.ww-theme :is(.dnd5e2, .themed) {
+.dnd5e2.sheet.ww-theme,
+.dnd5e2.sheet.ww-theme :is(.dnd5e2, .themed) {
   /* Base palette */
   --dnd5e-color-blue-white: var(--ww-ink);
   --dnd5e-color-blue-gray-1: var(--ww-line);
@@ -162,38 +162,38 @@
   --color-scrollbar: var(--ww-line-strong);
 }
 
-.dnd5e2.sheet.actor.ww-theme {
+.dnd5e2.sheet.ww-theme {
   border-color: var(--ww-line-strong);
   font-family: var(--ww-font-ui);
 }
 
 /* Form fields get their colors set on the elements themselves, so they need their own rule. */
-.dnd5e2.sheet.actor.ww-theme :is(input:not([type="range"]), select, textarea) {
+.dnd5e2.sheet.ww-theme :is(input:not([type="range"]), select, textarea) {
   --input-background-color: rgb(0 0 0 / 30%);
   --input-border-color: var(--ww-line);
   --input-placeholder-color: var(--ww-ink-faint);
 }
 
-.dnd5e2.sheet.actor.ww-theme button {
+.dnd5e2.sheet.ww-theme button {
   --button-border-color: var(--ww-line);
   --button-hover-border-color: var(--ww-line-strong);
   --control-border-color: var(--ww-line-strong);
 }
 
 /* Cards: darker panels with a faint gold edge. */
-.dnd5e2.sheet.actor.ww-theme .card {
+.dnd5e2.sheet.ww-theme .card {
   border: 1px solid var(--ww-line);
   box-shadow: 0 0 8px rgb(0 0 0 / 50%);
 }
 
-.dnd5e2.sheet.actor.ww-theme .card > .header,
-.dnd5e2.sheet.actor.ww-theme .card .header:not(.items-header) {
+.dnd5e2.sheet.ww-theme .card > .header,
+.dnd5e2.sheet.ww-theme .card .header:not(.items-header) {
   background: var(--ww-raised) !important;
   color: var(--ww-ink) !important;
   border-bottom: 1px solid var(--ww-line);
 }
 
-.dnd5e2.sheet.actor.ww-theme :is(h3, h4) {
+.dnd5e2.sheet.ww-theme :is(h3, h4) {
   font-family: var(--ww-font-display);
   letter-spacing: 0.04em;
 }
@@ -213,7 +213,7 @@
     0 4px 0 0 var(--ww-gold-dim);
 }
 
-.dnd5e2.sheet.actor.ww-theme .sheet-header .document-name {
+.dnd5e2.sheet.ww-theme .sheet-header .document-name {
   font-family: var(--ww-font-display);
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -221,22 +221,22 @@
   text-shadow: 0 2px 6px rgb(0 0 0 / 90%);
 }
 
-.dnd5e2.sheet.actor.ww-theme .sheet-header .class {
+.dnd5e2.sheet.ww-theme .sheet-header .class {
   color: var(--ww-gold);
   font-family: var(--ww-font-ui);
   font-weight: 500;
 }
 
-.dnd5e2.sheet.actor.ww-theme .sheet-header .xp-label {
+.dnd5e2.sheet.ww-theme .sheet-header .xp-label {
   color: var(--ww-ink-muted);
 }
 
-.dnd5e2.sheet.actor.ww-theme .sheet-header .xp-bar {
+.dnd5e2.sheet.ww-theme .sheet-header .xp-bar {
   background: #0f0d0a;
   border-color: var(--ww-gold-dim);
 }
 
-.dnd5e2.sheet.actor.ww-theme .sheet-header .xp-bar::after {
+.dnd5e2.sheet.ww-theme .sheet-header .xp-bar::after {
   background: var(--ww-gold);
   box-shadow: none;
 }
@@ -246,7 +246,7 @@
 /* -------------------------------------------- */
 
 /* Horizontal tab strip */
-.dnd5e2.sheet.actor.ww-theme :is(.sheet-tabs, nav.tabs:not(.tabs-right, .tabs-left)) > .item {
+.dnd5e2.sheet.ww-theme :is(.sheet-tabs, nav.tabs:not(.tabs-right, .tabs-left)) > .item {
   font-family: var(--ww-font-display);
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -255,28 +255,28 @@
   border-bottom: 2px solid transparent;
 }
 
-.dnd5e2.sheet.actor.ww-theme :is(.sheet-tabs, nav.tabs:not(.tabs-right, .tabs-left)) > .item:hover {
+.dnd5e2.sheet.ww-theme :is(.sheet-tabs, nav.tabs:not(.tabs-right, .tabs-left)) > .item:hover {
   color: var(--ww-ink);
 }
 
-.dnd5e2.sheet.actor.ww-theme :is(.sheet-tabs, nav.tabs:not(.tabs-right, .tabs-left)) > .item.active {
+.dnd5e2.sheet.ww-theme :is(.sheet-tabs, nav.tabs:not(.tabs-right, .tabs-left)) > .item.active {
   color: var(--ww-gold);
   font-weight: 700;
   border-bottom-color: var(--ww-gold);
 }
 
 /* Vertical icon tabs on the window edge */
-.dnd5e2.sheet.actor.ww-theme nav.tabs:is(.tabs-right, .tabs-left) {
+.dnd5e2.sheet.ww-theme nav.tabs:is(.tabs-right, .tabs-left) {
   background: var(--ww-leather);
   border-color: var(--ww-gold-dim);
 }
 
-.dnd5e2.sheet.actor.ww-theme nav.tabs:is(.tabs-right, .tabs-left) > .item {
+.dnd5e2.sheet.ww-theme nav.tabs:is(.tabs-right, .tabs-left) > .item {
   color: var(--ww-ink-muted);
   --icon-fill: var(--ww-ink-muted);
 }
 
-.dnd5e2.sheet.actor.ww-theme nav.tabs:is(.tabs-right, .tabs-left) > .item:is(.active, :hover) {
+.dnd5e2.sheet.ww-theme nav.tabs:is(.tabs-right, .tabs-left) > .item:is(.active, :hover) {
   background: var(--ww-gold);
   color: #1a140d;
   --icon-fill: #1a140d;
@@ -286,22 +286,22 @@
 /*  Sidebar                                     */
 /* -------------------------------------------- */
 
-.dnd5e2.sheet.actor.ww-theme .sidebar .card {
+.dnd5e2.sheet.ww-theme .sidebar .card {
   background: var(--ww-panel);
   border: 1px solid var(--ww-line-strong);
   box-shadow: 0 0 10px rgb(0 0 0 / 65%);
 }
 
-.dnd5e2.sheet.actor.ww-theme .sidebar .card .card-tab {
+.dnd5e2.sheet.ww-theme .sidebar .card .card-tab {
   background: var(--ww-panel);
 }
 
-.dnd5e2.sheet.actor.ww-theme .sidebar .favorites > h3 {
+.dnd5e2.sheet.ww-theme .sidebar .favorites > h3 {
   color: var(--ww-ink-muted);
 }
 
 /* Portrait: thin gold frame inside a dark mat. */
-.dnd5e2.sheet.actor.ww-theme .portrait > :is(img, video) {
+.dnd5e2.sheet.ww-theme .portrait > :is(img, video) {
   border: 1px solid var(--ww-gold-dim);
   box-shadow: 0 0 0 3px #0f0d0a, 0 0 0 4px var(--ww-line-strong);
 }
@@ -315,31 +315,31 @@
  * can still win over ours. The badge picture, frame color and empty-slot outlines are therefore set
  * directly on the elements, marked important so the layer order can't undo them.
  */
-.dnd5e2.sheet.actor.ww-theme .ability-scores .ability-score::before {
+.dnd5e2.sheet.ww-theme .ability-scores .ability-score::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M7 1.5H57L62.5 7V50L57 55.5H7L1.5 50V7Z' fill='%231c1813' stroke='%238f7442' stroke-width='1.5'/%3E%3Cpath d='M8.5 4.5H55.5L59.5 8.5V48.5L55.5 52.5H8.5L4.5 48.5V8.5Z' fill='none' stroke='%233d3326'/%3E%3C/svg%3E") !important;
 }
 
 /* filigree-box draws its frame inside its own shadow DOM, so the colors can only reach it as variables on the element. */
-.dnd5e2.sheet.actor.ww-theme filigree-box {
+.dnd5e2.sheet.ww-theme filigree-box {
   --filigree-border-color: var(--ww-gold-dim) !important;
   --filigree-background-color: var(--ww-panel) !important;
   --filigree-drop-shadow: drop-shadow(0 0 10px rgb(0 0 0 / 55%)) !important;
 }
 
-.dnd5e2.sheet.actor.ww-theme .pill-lg.empty {
+.dnd5e2.sheet.ww-theme .pill-lg.empty {
   border: 1px dashed var(--ww-line-strong) !important;
   color: var(--ww-ink-muted) !important;
   background: transparent !important;
   opacity: 1;
 }
 
-.dnd5e2.sheet.actor.ww-theme .pill-lg.empty:hover {
+.dnd5e2.sheet.ww-theme .pill-lg.empty:hover {
   border-color: var(--ww-gold-dim) !important;
   color: var(--ww-ink) !important;
 }
 
 /* dnd5e fades the favorites drop zone to a quarter opacity; show it like the other empty slots. */
-.dnd5e2.sheet.actor.ww-theme .favorites li.drop {
+.dnd5e2.sheet.ww-theme .favorites li.drop {
   opacity: 1 !important;
   background: rgb(0 0 0 / 15%);
   border: 1px dashed var(--ww-line-strong) !important;
@@ -347,23 +347,23 @@
 }
 
 /* Initiative, Speed and Proficiency: a leather lozenge with a double rule in place of dnd5e's tan one. */
-.dnd5e2.sheet.actor.ww-theme .sidebar .lozenges .lozenge {
+.dnd5e2.sheet.ww-theme .sidebar .lozenges .lozenge {
   background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 68 30'%3E%3Cpath d='M10 1H58L67 15L58 29H10L1 15Z' fill='%231c1813' stroke='%238f7442' stroke-width='1.5'/%3E%3Cpath d='M12 4H56L63.5 15L56 26H12L4.5 15Z' fill='none' stroke='%233d3326'/%3E%3C/svg%3E") no-repeat top center / 68px 30px !important;
 }
 
-.dnd5e2.sheet.actor.ww-theme .sidebar .lozenges .lozenge .value {
+.dnd5e2.sheet.ww-theme .sidebar .lozenges .lozenge .value {
   color: #efe3c8;
   font-family: var(--ww-font-ui);
   text-shadow: 0 1px 3px rgb(0 0 0 / 80%);
 }
 
-.dnd5e2.sheet.actor.ww-theme .sidebar .lozenges .lozenge .label {
+.dnd5e2.sheet.ww-theme .sidebar .lozenges .lozenge .label {
   color: var(--ww-gold);
   letter-spacing: 0.04em;
 }
 
 /* Ability scores: the score sits in a gold-edged box beneath the plaque. */
-.dnd5e2.sheet.actor.ww-theme .ability-scores .ability-score .score {
+.dnd5e2.sheet.ww-theme .ability-scores .ability-score .score {
   box-sizing: border-box;
   background: #0f0d0a;
   border: 1px solid var(--ww-gold-dim);
@@ -372,30 +372,30 @@
   font-weight: 700;
 }
 
-.dnd5e2.sheet.actor.ww-theme .ability-scores .ability-score .score > input {
+.dnd5e2.sheet.ww-theme .ability-scores .ability-score .score > input {
   height: 21px;
   color: var(--ww-gold);
   font-family: var(--ww-font-display);
   font-weight: 700;
 }
 
-.dnd5e2.sheet.actor.ww-theme .ability-scores .ability-score .mod {
+.dnd5e2.sheet.ww-theme .ability-scores .ability-score .mod {
   font-family: var(--ww-font-ui);
   font-weight: 700;
 }
 
 /* Skill and saving throw rows: a touch more room and a clearer hover. */
-.dnd5e2.sheet.actor.ww-theme :is(.skills, .tools, .saves) > ul > li .name {
+.dnd5e2.sheet.ww-theme :is(.skills, .tools, .saves) > ul > li .name {
   font-size: var(--font-size-14, 14px);
   font-weight: 500;
   letter-spacing: 0.01em;
 }
 
-.dnd5e2.sheet.actor.ww-theme :is(.skills, .tools, .saves) > ul > li:hover {
+.dnd5e2.sheet.ww-theme :is(.skills, .tools, .saves) > ul > li:hover {
   background: rgb(201 164 92 / 6%);
 }
 
-.dnd5e2.sheet.actor.ww-theme :is(.skills, .tools, .saves) .ability {
+.dnd5e2.sheet.ww-theme :is(.skills, .tools, .saves) .ability {
   color: var(--ww-gold-dim);
   font-weight: 700;
 }
@@ -413,7 +413,7 @@
   box-shadow: inset 0 0 32px rgb(0 0 0 / 55%);
 }
 
-.dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="features"], [data-tab="spells"], [data-tab="effects"]) :is(.card, .items-section) {
+.dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="contents"], [data-tab="features"], [data-tab="spells"], [data-tab="effects"]) :is(.card, .items-section) {
   background: var(--ww-panel);
   border: 1px solid var(--ww-line);
   box-shadow: none;
@@ -445,7 +445,7 @@
   text-shadow: none !important;
 }
 
-.dnd5e2.ww-theme .tab[data-tab="inventory"] item-list-controls :is(input[type="search"], input[type="text"]) {
+.dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="contents"]) item-list-controls :is(input[type="search"], input[type="text"]) {
   background: var(--ww-panel);
   border: 1px solid var(--ww-line);
   border-radius: 3px;
@@ -483,7 +483,7 @@
 }
 
 /* Containers along the top */
-.dnd5e2.ww-theme .tab[data-tab="inventory"] .containers .container {
+.dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="contents"]) .containers .container {
   background: var(--ww-tint, var(--ww-slot-bg));
   border: 2px solid var(--ww-frame, var(--ww-line));
   border-radius: 3px;
@@ -593,7 +593,7 @@
 /* -------------------------------------------- */
 
 /* Flatten dnd5e's sections into one grid so every item becomes a slot. */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list {
   display: grid;
   /* Tracks stretch to fill the row so the section dividers reach the right edge; slots stay square inside them. */
   grid-template-columns: repeat(auto-fill, minmax(var(--ww-slot, 56px), 1fr));
@@ -607,17 +607,17 @@
   box-shadow: inset 0 0 24px rgb(0 0 0 / 50%);
 }
 
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list :is(.items-section, .item-list) {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list :is(.items-section, .item-list) {
   display: contents;
 }
 
 /* dnd5e's search and filters hide entries with the hidden attribute. */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list :is(.items-section, .item)[hidden] {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list :is(.items-section, .item)[hidden] {
   display: none !important;
 }
 
 /* One continuous grid; the category tabs above it do the sorting by type. */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .items-header {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .items-header {
   display: none !important;
 }
 
@@ -626,13 +626,13 @@
  * whatever dnd5e's grouping and sort controls are set to. Within a type, dnd5e's own order is kept.
  * This only changes the display order, so dnd5e's drag-to-reorder and saved sort are left alone.
  */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item { order: 7; }
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-type="weapon"] { order: 1; }
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-type="equipment"] { order: 2; }
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-type="consumable"] { order: 3; }
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-type="tool"] { order: 4; }
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-type="container"] { order: 5; }
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-type="loot"] { order: 6; }
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item { order: 7; }
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item[data-ww-type="weapon"] { order: 1; }
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item[data-ww-type="equipment"] { order: 2; }
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item[data-ww-type="consumable"] { order: 3; }
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item[data-ww-type="tool"] { order: 4; }
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item[data-ww-type="container"] { order: 5; }
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item[data-ww-type="loot"] { order: 6; }
 
 /* Empty slots that pad out the grid, always after the items. */
 .dnd5e2.ww-theme .ww-fillers { display: contents; }
@@ -649,7 +649,7 @@
 }
 
 /* The slot */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item {
   position: relative;
   width: var(--ww-slot, 56px);
   height: var(--ww-slot, 56px);
@@ -661,14 +661,14 @@
   transition: transform 140ms ease-out, filter 140ms ease-out, box-shadow 180ms ease-out;
 }
 
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item:hover {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item:hover {
   transform: translateY(-1px);
   filter: brightness(1.15);
   box-shadow: inset 0 2px 6px rgb(0 0 0 / 55%), 0 0 0 1px var(--ww-gold), 0 0 12px rgb(201 164 92 / 40%);
 }
 
 /* Fitted by the module script to the picture's visible content (see fitPicture). */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item img.item-image.ww-fit {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item img.item-image.ww-fit {
   position: absolute;
   left: var(--ww-fit-x);
   top: var(--ww-fit-y);
@@ -679,23 +679,23 @@
   object-fit: fill;
 }
 
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-row {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item .item-row {
   height: 100%;
 }
 
 /* Sheet themes can add accent bars or backgrounds to rows; a slot doesn't want them. */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item :is(.item-row, .item-name) {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item :is(.item-row, .item-name) {
   background: none !important;
   border: none !important;
   box-shadow: none !important;
 }
 
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item :is(.item-row, .item-name)::before,
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name::after {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item :is(.item-row, .item-name)::before,
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item .item-name::after {
   display: none !important;
 }
 
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item .item-name {
   width: 100%;
   height: 100%;
   padding: 0;
@@ -704,14 +704,14 @@
 }
 
 /* Keep only the picture; the name and details live on the hover card. */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name > :not(.item-image, .concentration),
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-row > :not(.item-name),
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-description {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item .item-name > :not(.item-image, .concentration),
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item .item-row > :not(.item-name),
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item .item-description {
   display: none;
 }
 
 /* Pictures fill the whole slot, cropped to a square whatever their original shape. */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item img.item-image {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item img.item-image {
   width: 100%;
   height: 100%;
   min-width: 0;
@@ -726,7 +726,7 @@
 }
 
 /* dnd5e's own line icons (SVG) keep a little breathing room instead of being cropped. */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item dnd5e-icon.item-image {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item dnd5e-icon.item-image {
   --icon-size: calc(var(--ww-slot, 56px) - 16px);
   width: calc(var(--ww-slot, 56px) - 16px);
   height: calc(var(--ww-slot, 56px) - 16px);
@@ -736,12 +736,12 @@
   box-shadow: none !important;
 }
 
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item .item-name {
   overflow: hidden;
 }
 
 /* Equipped: gold diamond, top left */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-equipped]::before {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item[data-ww-equipped]::before {
   content: "";
   position: absolute;
   z-index: 2;
@@ -756,7 +756,7 @@
 }
 
 /* Quantity: bottom right */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-qty]::after {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item[data-ww-qty]::after {
   content: attr(data-ww-qty);
   position: absolute;
   z-index: 2;
@@ -769,7 +769,7 @@
 }
 
 /* Attuned: violet star, top right */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-attuned] .item-row::after {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item[data-ww-attuned] .item-row::after {
   content: "";
   position: absolute;
   z-index: 2;
@@ -847,8 +847,8 @@
 }
 
 /* With the weight bar moved to the footer, the top strip only holds containers. */
-.dnd5e2.ww-theme .tab[data-tab="inventory"] > .top:not(:has(.container)),
-.dnd5e2.ww-theme .tab[data-tab="inventory"] .inventory-element > .bottom:empty {
+.dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="contents"]) > .top:not(:has(.container)),
+.dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="contents"]) .inventory-element > .bottom:empty {
   display: none;
 }
 
@@ -856,7 +856,7 @@
 /*  Footer: carried weight, attunement, coins   */
 /* -------------------------------------------- */
 
-.dnd5e2.ww-theme .tab[data-tab="inventory"] .ww-footer {
+.dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="contents"]) .ww-footer {
   position: sticky;
   bottom: -12px;
   z-index: 3;
@@ -958,7 +958,7 @@
 .dnd5e2.ww-theme .ww-footer .ww-attune-count { color: var(--ww-ink); }
 
 /* The footer shows attunement now, so dnd5e's own counter beside the search box steps aside. */
-.dnd5e2.ww-theme .tab[data-tab="inventory"] .middle .attunement { display: none; }
+.dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="contents"]) .middle .attunement { display: none; }
 
 .dnd5e2.ww-theme .ww-footer section.currency {
   margin-left: auto;
@@ -1294,7 +1294,7 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
  * A soft halo that slowly breathes. Only the halo layer's opacity animates, which the browser can do
  * without repainting the slot, so a grid full of legendaries stays smooth.
  */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item:is([data-ww-rarity="legendary"], [data-ww-rarity="artifact"]) .item-row::before {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item:is([data-ww-rarity="legendary"], [data-ww-rarity="artifact"]) .item-row::before {
   content: "" !important;
   display: block !important;
   position: absolute;
@@ -1324,7 +1324,7 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
 /* -------------------------------------------- */
 
 /* Switching category: the slots that appear settle in. */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"].ww-animate .items-list .item {
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]).ww-animate .items-list .item {
   animation: ww-slot-in 220ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 
@@ -1355,15 +1355,15 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
 
 /* For anyone who has asked their system for less motion: no movement, and a steady glow. */
 @media (prefers-reduced-motion: reduce) {
-  .dnd5e2.ww-theme .tab[data-tab="inventory"] .items-list .item,
-  .dnd5e2.ww-theme .tab[data-tab="inventory"] .items-list .item .item-row::before,
+  .dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item,
+  .dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item .item-row::before,
   .dnd5e2.ww-theme .items-list .ww-use-pip,
   .ww-detail .ww-detail-scroll {
     animation: none !important;
     transition: none !important;
   }
 
-  .dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item:hover { transform: none; }
+  .dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item:hover { transform: none; }
 }
 
 /* -------------------------------------------- */
@@ -1374,14 +1374,14 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
  * dnd5e draws its banner art as a faded layer behind the top of the window. The leather header
  * covers most of it, but the faded lower edge showed through as a teal band under the header.
  */
-.dnd5e2.sheet.actor.ww-theme .window-content::before,
-.dnd5e2.sheet.actor.ww-theme:not(.minimized)::before {
+.dnd5e2.sheet.ww-theme .window-content::before,
+.dnd5e2.sheet.ww-theme:not(.minimized)::before {
   content: none !important;
   display: none !important;
 }
 
 /* The teal band under the header: a blue gradient painted on the window content's ::after layer. */
-.dnd5e2.sheet.actor.ww-theme .window-content::after {
+.dnd5e2.sheet.ww-theme .window-content::after {
   background: none !important;
 }
 
@@ -1389,19 +1389,19 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
  * Some sheet layouts (yours adds a horizontal tab strip) paint a colored band behind the tab names,
  * either on the strip itself, on whatever wraps it, or on the window content. Let the leather through.
  */
-.dnd5e2.sheet.actor.ww-theme :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs) {
+.dnd5e2.sheet.ww-theme :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs) {
   background: var(--ww-leather) !important;
   border-color: var(--ww-line) !important;
 }
 
-.dnd5e2.sheet.actor.ww-theme :has(> :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs)),
-.dnd5e2.sheet.actor.ww-theme .window-content,
-.dnd5e2.sheet.actor.ww-theme .sheet-body {
+.dnd5e2.sheet.ww-theme :has(> :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs)),
+.dnd5e2.sheet.ww-theme .window-content,
+.dnd5e2.sheet.ww-theme .sheet-body {
   background: transparent !important;
 }
 
-.dnd5e2.sheet.actor.ww-theme :has(> :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs))::before,
-.dnd5e2.sheet.actor.ww-theme :has(> :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs))::after {
+.dnd5e2.sheet.ww-theme :has(> :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs))::before,
+.dnd5e2.sheet.ww-theme :has(> :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs))::after {
   background: none !important;
 }
 
@@ -1409,7 +1409,7 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
 /*  Lists (list view, features, spells)         */
 /* -------------------------------------------- */
 
-.dnd5e2.ww-theme:not(.ww-grid) .tab[data-tab="inventory"] .items-section,
+.dnd5e2.ww-theme:not(.ww-grid) .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-section,
 .dnd5e2.ww-theme .tab:not([data-tab="inventory"]) .items-section {
   border-radius: 4px;
   overflow: hidden;
@@ -1463,7 +1463,7 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
 }
 
 /* Spellcasting cards: ability, attack, save DC and prepared count as gold figures under small labels. */
-.dnd5e2.sheet.actor.ww-theme .tab[data-tab="spells"] .spellcasting.card .info .label {
+.dnd5e2.sheet.ww-theme .tab[data-tab="spells"] .spellcasting.card .info .label {
   font-family: var(--ww-font-ui);
   font-size: 11px;
   letter-spacing: 0.06em;
@@ -1471,24 +1471,24 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
   color: var(--ww-ink-muted);
 }
 
-.dnd5e2.sheet.actor.ww-theme .tab[data-tab="spells"] .spellcasting.card .info .value {
+.dnd5e2.sheet.ww-theme .tab[data-tab="spells"] .spellcasting.card .info .value {
   font-family: var(--ww-font-display);
   font-weight: 700;
   color: var(--ww-gold);
 }
 
-.dnd5e2.sheet.actor.ww-theme .tab[data-tab="spells"] .spellcasting.card.primary {
+.dnd5e2.sheet.ww-theme .tab[data-tab="spells"] .spellcasting.card.primary {
   border-color: var(--ww-gold-dim);
 }
 
 /* Spell slot pips on each level's header: gold when available, dark and outlined when spent. */
 /* dnd5e sets these on the pips themselves, so ours are marked important (see the Details tab note). */
-.dnd5e2.sheet.actor.ww-theme .spells-list .items-section .pips .pip {
+.dnd5e2.sheet.ww-theme .spells-list .items-section .pips .pip {
   --icon-fill: #0f0d0a !important;
   --icon-stroke: var(--ww-gold-dim) !important;
 }
 
-.dnd5e2.sheet.actor.ww-theme .spells-list .items-section .pips .pip.filled {
+.dnd5e2.sheet.ww-theme .spells-list .items-section .pips .pip.filled {
   --icon-fill: var(--ww-gold) !important;
   --icon-stroke: var(--ww-gold) !important;
 }
@@ -1531,39 +1531,39 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
 .dnd5e2.ww-theme .items-list button.ww-use-pip:focus-visible { outline: 2px solid var(--ww-gold); outline-offset: 1px; }
 
 /* Class badges: leather plaques with a double rule, like the ability scores. */
-.dnd5e2.sheet.actor.ww-theme .classes .class.pill-lg {
+.dnd5e2.sheet.ww-theme .classes .class.pill-lg {
   background: var(--ww-panel) !important;
   border: 1px solid var(--ww-gold-dim) !important;
   box-shadow: inset 0 0 0 2px var(--ww-panel), inset 0 0 0 3px var(--ww-line), 0 0 8px rgb(0 0 0 / 50%) !important;
 }
 
-.dnd5e2.sheet.actor.ww-theme .classes .class .underlay {
+.dnd5e2.sheet.ww-theme .classes .class .underlay {
   opacity: 0.12;
   filter: sepia(0.4);
 }
 
-.dnd5e2.sheet.actor.ww-theme .classes .class .gold-icon {
+.dnd5e2.sheet.ww-theme .classes .class .gold-icon {
   border: 1px solid var(--ww-gold-dim) !important;
   box-shadow: 0 0 0 2px #0f0d0a !important;
 }
 
-.dnd5e2.sheet.actor.ww-theme .classes .class .title {
+.dnd5e2.sheet.ww-theme .classes .class .title {
   font-family: var(--ww-font-display);
   font-weight: 700;
   color: var(--ww-ink);
 }
 
-.dnd5e2.sheet.actor.ww-theme .classes .class .subtitle {
+.dnd5e2.sheet.ww-theme .classes .class .subtitle {
   font-family: var(--ww-font-ui);
   color: var(--ww-ink-muted);
 }
 
 /* The level: a compact gold-edged box around the number (or the level dropdown while editing). */
-.dnd5e2.sheet.actor.ww-theme .classes .class .level {
+.dnd5e2.sheet.ww-theme .classes .class .level {
   align-self: center;
 }
 
-.dnd5e2.sheet.actor.ww-theme .classes .class .level > :is(span, select) {
+.dnd5e2.sheet.ww-theme .classes .class .level > :is(span, select) {
   box-sizing: border-box;
   height: 30px;
   min-width: 32px;
@@ -1581,9 +1581,60 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
   text-shadow: none;
 }
 
-.dnd5e2.sheet.actor.ww-theme .classes .class .level > select {
+.dnd5e2.sheet.ww-theme .classes .class .level > select {
   width: auto;
   text-align: center;
+}
+
+/* -------------------------------------------- */
+/*  Container window (bags, chests)             */
+/* -------------------------------------------- */
+
+/* dnd5e's faded banner art behind the item header. */
+.dnd5e2.sheet.item.ww-theme:not(.minimized)::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Leather header with the double gold rule, full width of the window. */
+.dnd5e2.sheet.item.ww-theme .sheet-header {
+  margin: 0 -12px 6px;
+  padding: 12px 24px 14px;
+  background: var(--ww-leather);
+  border-bottom: 1px solid var(--ww-gold-dim);
+  box-shadow: inset 0 -40px 50px -30px rgb(0 0 0 / 55%), 0 3px 0 0 #120f0b, 0 4px 0 0 var(--ww-gold-dim);
+}
+
+.dnd5e2.sheet.item.ww-theme .sheet-header .document-image {
+  border: 1px solid var(--ww-gold-dim) !important;
+  border-radius: 3px;
+  box-shadow: 0 0 0 3px #0f0d0a, 0 0 0 4px var(--ww-line-strong) !important;
+}
+
+.dnd5e2.sheet.item.ww-theme .sheet-header .document-name {
+  font-family: var(--ww-font-display) !important;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #efe3c8;
+  text-shadow: 0 2px 6px rgb(0 0 0 / 90%);
+}
+
+.dnd5e2.sheet.item.ww-theme .sheet-header .subtitles {
+  font-family: var(--ww-font-ui);
+  color: var(--ww-gold-dim);
+}
+
+/* The tab row's own underline would double up with the theme's gold underline. */
+.dnd5e2.sheet.item.ww-theme nav.tabs .item > span {
+  border-bottom-color: transparent !important;
+}
+
+/* Contents footer: dnd5e's item tab has its own tight padding and scrolls itself, so the footer sits inside it. */
+.dnd5e2.ww-theme .tab[data-tab="contents"] .ww-footer {
+  bottom: -6px;
+  margin: 8px 0 0;
+  border: 1px solid var(--ww-line);
+  border-radius: 4px;
 }
 
 /* -------------------------------------------- */

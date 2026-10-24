@@ -11,6 +11,7 @@ A restyle of dnd5e character and NPC sheets, inspired by The Witcher 3 and Morro
 - **Features tab.** Kept as a list, in the same dark panel. Limited uses show as pips you can click to spend or restore, class badges become leather plaques, and the detail panel shows a feature's activation, target, duration, uses and recovery, requirements and description.
 - **Spells tab.** The same treatment: gold figures on the spellcasting cards, gold slot pips, and a detail panel with level and school, casting time, range, target, duration, components, concentration or ritual, damage or healing, and a Cast button.
 - **Effects and Biography.** Effects use the same list styling; active conditions glow gold. The biography reads as a parchment page with a double gold rule, with the editing toolbar on leather above it.
+- **Bags and other containers.** A container's own window gets the leather header and the same slot grid for its contents, with a footer showing its capacity and coins.
 - **Footer.** Carried weight, attunement and coins sit in one bar along the bottom.
 - **Resizable.** A slider on the inventory tab sets the slot size (44 to 80 px). Each player's choice is saved on their own device.
 - **Grid or list.** A toggle switches back to dnd5e's rows, restyled to match.

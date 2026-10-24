@@ -9,6 +9,9 @@ const DOCK_WIDTH = 760;
 /** The grid always shows at least this many rows, padding with empty slots. */
 const MIN_ROWS = 5;
 
+/** Tabs shown as a slot grid: a character's inventory and a container's contents. */
+const GRID_TABS = ["inventory", "contents"];
+
 const CATEGORIES = [
   { id: "all", icon: "fa-layer-group" },
   { id: "weapon", icon: "fa-khanda" },
@@ -88,6 +91,8 @@ Hooks.on("renderCharacterActorSheet", onRenderActorSheet);
 Hooks.on("renderNPCActorSheet", onRenderActorSheet);
 Hooks.on("closeCharacterActorSheet", onCloseActorSheet);
 Hooks.on("closeNPCActorSheet", onCloseActorSheet);
+Hooks.on("renderContainerSheet", onRenderContainerSheet);
+Hooks.on("closeContainerSheet", onCloseActorSheet);
 
 /* -------------------------------------------- */
 /*  Rendering                                   */
@@ -104,16 +109,17 @@ function onRenderActorSheet(app, element) {
   element.classList.toggle("ww-theme", enabled);
   if ( !enabled ) return;
 
+  const find = id => app.actor?.items.get(id);
   const tab = element.querySelector('.tab[data-tab="inventory"]');
   const inventory = tab?.querySelector(".inventory-element");
   if ( inventory ) {
     const state = tabState(app, "inventory");
-    annotateItems(app.actor, tab);
+    annotateItems(find, tab);
     fitPictures(tab);
     injectControls(tab);
     injectCategories(tab, inventory, state);
-    buildFooter(app.actor, tab, inventory);
-    injectDetailPanel(app, tab, inventory, state);
+    buildFooter(tab, inventory, attunementBlock(app.actor), "Carried");
+    injectDetailPanel(find, tab, inventory, state);
     observeLayout(tab, inventory, state);
   }
 
@@ -123,12 +129,40 @@ function onRenderActorSheet(app, element) {
     const list = listTab?.querySelector(".inventory-element");
     if ( !list ) continue;
     const state = tabState(app, id);
-    annotateItems(app.actor, listTab);
-    decorateUses(app.actor, listTab);
-    injectDetailPanel(app, listTab, list, state);
+    annotateItems(find, listTab);
+    decorateUses(find, listTab);
+    injectDetailPanel(find, listTab, list, state);
     observeLayout(listTab, list, state);
   }
 
+  applySheetState(element);
+}
+
+/**
+ * Theme a container's own window (a bag, a chest) and give its contents the same slot grid as the inventory.
+ * @param {ApplicationV2} app
+ * @param {HTMLElement} element
+ */
+function onRenderContainerSheet(app, element) {
+  element.classList.add("ww-sheet");
+  const enabled = game.settings.get(MODULE_ID, "enabled");
+  element.classList.toggle("ww-theme", enabled);
+  if ( !enabled ) return;
+
+  // A container's contents are its owner's items, or world items when the container isn't owned.
+  const container = app.document ?? app.item;
+  const find = id => container?.actor?.items.get(id) ?? game.items?.get(id);
+  const tab = element.querySelector('.tab[data-tab="contents"]');
+  const inventory = tab?.querySelector(".inventory-element");
+  if ( inventory ) {
+    const state = tabState(app, "contents");
+    annotateItems(find, tab);
+    fitPictures(tab);
+    injectControls(tab);
+    buildFooter(tab, inventory, null, "Capacity");
+    injectDetailPanel(find, tab, inventory, state);
+    observeLayout(tab, inventory, state);
+  }
   applySheetState(element);
 }
 
@@ -158,12 +192,12 @@ function onCloseActorSheet(app) {
 
 /**
  * Copy the item data the slot styles depend on onto each row, since dnd5e doesn't render it as attributes.
- * @param {Actor} actor
+ * @param {function(string): Item} find  Looks up an item shown on this sheet by id.
  * @param {HTMLElement} root
  */
-function annotateItems(actor, root) {
+function annotateItems(find, root) {
   for ( const el of root.querySelectorAll("li.item[data-item-id], .containers .container[data-item-id]") ) {
-    const item = actor?.items.get(el.dataset.itemId);
+    const item = find(el.dataset.itemId);
     if ( !item ) continue;
     const { rarity, equipped, attuned, quantity } = item.system;
     el.dataset.wwType = item.type;
@@ -182,14 +216,14 @@ const MAX_PIPS = 12;
 /**
  * Show limited uses as a row of pips, like the attunement dots. Clicking a pip sets the remaining uses
  * by writing to dnd5e's own uses field and letting dnd5e save it, so nothing bypasses its handling.
- * @param {Actor} actor
+ * @param {function(string): Item} find  Looks up an item shown on this sheet by id.
  * @param {HTMLElement} tab
  */
-function decorateUses(actor, tab) {
+function decorateUses(find, tab) {
   for ( const column of tab.querySelectorAll(".items-list li.item[data-item-id] .item-uses:not(.empty)") ) {
     // Recharge and cooldown variants show an icon rather than value / max; leave those alone.
     if ( !column.querySelector(".max") || column.querySelector(".ww-uses-pips") ) continue;
-    const item = actor?.items.get(column.closest("li.item").dataset.itemId);
+    const item = find(column.closest("li.item").dataset.itemId);
     const uses = item?.system.uses;
     const max = Number(uses?.max);
     if ( !max || (max > MAX_PIPS) ) continue;
@@ -334,16 +368,18 @@ function setCategory(tab, category) {
 }
 
 /**
- * Gather carried weight, attunement and coins into one bar along the bottom of the tab.
+ * Gather weight, attunement and coins into one bar along the bottom of the tab.
  * @param {HTMLElement} tab
  * @param {HTMLElement} inventory
+ * @param {HTMLElement|null} attunement  The attunement block, for characters; null for containers.
+ * @param {string} weightLabel           "Carried" for a character, "Capacity" for a container.
  */
-function buildFooter(actor, tab, inventory) {
+function buildFooter(tab, inventory, attunement, weightLabel) {
   if ( tab.querySelector(".ww-footer") ) return;
   const encumbrance = tab.querySelector(".top .encumbrance") ?? inventory.querySelector(".bottom .encumbrance");
   const parts = [
-    encumbrance ? carriedBlock(encumbrance) : null,
-    attunementBlock(actor),
+    encumbrance ? carriedBlock(encumbrance, weightLabel) : null,
+    attunement,
     inventory.querySelector("section.currency")
   ].filter(Boolean);
   if ( !parts.length ) return;
@@ -355,18 +391,19 @@ function buildFooter(actor, tab, inventory) {
 }
 
 /**
- * Wrap dnd5e's encumbrance meter with a "Carried 35 / 150" line above it, read from the meter's own label.
+ * Wrap dnd5e's encumbrance or capacity meter with a "Carried 35 / 150" line above it, read from the meter's own label.
  * @param {HTMLElement} encumbrance
+ * @param {string} label  The localization key for the line's label.
  * @returns {HTMLElement}
  */
-function carriedBlock(encumbrance) {
+function carriedBlock(encumbrance, label) {
   const value = encumbrance.querySelector(".label .value")?.textContent.trim();
   const max = encumbrance.querySelector(".label .max")?.textContent.trim();
   const block = document.createElement("div");
   block.className = "ww-carried";
   block.innerHTML = `
     <div class="ww-carried-head">
-      <span class="ww-carried-label">${t("Carried")}</span>
+      <span class="ww-carried-label">${t(label)}</span>
       <span class="ww-carried-value"></span>
     </div>`;
   if ( value && max ) block.querySelector(".ww-carried-value").textContent = `${value} / ${max}`;
@@ -394,12 +431,12 @@ function attunementBlock(actor) {
 
 /**
  * Add the parchment panel that shows the hovered item's card beside the grid on wide sheets.
- * @param {ApplicationV2} app
+ * @param {function(string): Item} find  Looks up an item shown on this sheet by id.
  * @param {HTMLElement} tab
  * @param {HTMLElement} inventory
  * @param {object} state
  */
-function injectDetailPanel(app, tab, inventory, state) {
+function injectDetailPanel(find, tab, inventory, state) {
   if ( inventory.querySelector(".ww-detail") ) return;
   const panel = document.createElement("aside");
   panel.className = "ww-detail";
@@ -407,7 +444,7 @@ function injectDetailPanel(app, tab, inventory, state) {
   inventory.append(panel);
 
   const list = inventory.querySelector(".items-list");
-  const show = foundry.utils.debounce(id => showDetail(app, tab, panel, id, state), 60);
+  const show = foundry.utils.debounce(id => showDetail(find, tab, panel, id, state), 60);
   const onEnter = event => {
     const id = event.target.closest("li.item[data-item-id]")?.dataset.itemId;
     if ( id && (id !== state.selected) ) show(id);
@@ -415,22 +452,22 @@ function injectDetailPanel(app, tab, inventory, state) {
   list?.addEventListener("pointerover", onEnter);
   list?.addEventListener("focusin", onEnter);
 
-  const first = app.actor?.items.has(state.selected) ? state.selected
+  const first = (state.selected && find(state.selected)) ? state.selected
     : list?.querySelector("li.item[data-item-id]")?.dataset.itemId;
-  if ( first ) showDetail(app, tab, panel, first, state);
+  if ( first ) showDetail(find, tab, panel, first, state);
   else panel.innerHTML = `<p class="ww-detail-empty">${t("NoItem")}</p>`;
 }
 
 /**
- * Fill the detail panel with an item's dnd5e card and Witchwind actions.
- * @param {ApplicationV2} app
+ * Fill the detail panel with an item's details and Witchwind actions.
+ * @param {function(string): Item} find  Looks up an item shown on this sheet by id.
  * @param {HTMLElement} tab
  * @param {HTMLElement} panel
  * @param {string} itemId
  * @param {object} state
  */
-async function showDetail(app, tab, panel, itemId, state) {
-  const item = app.actor?.items.get(itemId);
+async function showDetail(find, tab, panel, itemId, state) {
+  const item = find(itemId);
   if ( !item ) return;
   state.selected = itemId;
   for ( const li of tab.querySelectorAll("li.item[data-ww-selected]") ) delete li.dataset.wwSelected;
@@ -718,8 +755,8 @@ function observeLayout(tab, inventory, state) {
  * @param {HTMLElement} tab
  */
 function fillSlots(tab) {
-  // Only the inventory is a grid; the Features list never gets empty slots.
-  if ( tab?.dataset.tab !== "inventory" ) return;
+  // Only the inventory and container contents are grids; the Features list never gets empty slots.
+  if ( !GRID_TABS.includes(tab?.dataset.tab) ) return;
   const list = tab.querySelector(".inventory-element .items-list");
   if ( !list ) return;
   let fillers = list.querySelector(":scope > .ww-fillers");
@@ -737,7 +774,8 @@ function fillSlots(tab) {
   const current = fillers?.childElementCount ?? 0;
 
   let rows = Math.max(Math.ceil(shown / columns) + 1, MIN_ROWS);
-  const scroller = scrollParent(tab);
+  // A container window sizes itself to its contents, so only the character sheet grows to fill its space.
+  const scroller = (tab.dataset.tab === "inventory") ? scrollParent(tab) : null;
   if ( scroller ) {
     // Measured in the scroller's content coordinates, so scrolling doesn't change the answer.
     const tabBottom = tab.getBoundingClientRect().bottom - scroller.getBoundingClientRect().top + scroller.scrollTop;
@@ -892,7 +930,7 @@ function applySheetState(element) {
     slider.hidden = view !== "grid";
     slider.querySelector("input").value = size;
   }
-  scheduleFill(element.querySelector('.tab[data-tab="inventory"]'));
+  for ( const id of GRID_TABS ) scheduleFill(element.querySelector(`.tab[data-tab="${id}"]`));
 }
 
 /* -------------------------------------------- */
