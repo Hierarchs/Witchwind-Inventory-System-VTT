@@ -1,7 +1,8 @@
 # Witchwind Inventory
 
-A restyle of the dnd5e character sheet's inventory tab, inspired by The Witcher 3 and Morrowind.
+A restyle of dnd5e character and NPC sheets, inspired by The Witcher 3 and Morrowind.
 
+- **Whole sheet.** Dark leather and gold replace dnd5e's banner art and blue-grey theme: a leather header with a double gold rule, Cinzel headings, and brown panels on every tab and the sidebar. Works whether Foundry is set to light or dark.
 - **Slot grid.** Items become square slots on dark leather, framed by rarity (uncommon green, rare blue, very rare purple, legendary orange, artifact red). A gold diamond marks equipped items, a violet star marks attuned ones, and stack sizes sit in the corner.
 - **Resizable.** A slider on the inventory tab sets the slot size (44 to 80 px). Each player's choice is saved on their own device.
 - **Grid or list.** A toggle switches back to dnd5e's rows, restyled to match.
@@ -36,11 +37,11 @@ Under **Configure Settings > Witchwind Inventory**:
 
 | Setting | What it does |
 |---|---|
-| Restyle character inventory | Turns the restyle on or off for you. |
+| Restyle actor sheets | Turns the restyle on or off for you. |
 | Slot size | Default slot size in grid view. |
 | Item card style | Parchment, Steel, or dnd5e default. |
 
 ## Notes
 
 - The fonts (Cinzel, Alegreya, Alegreya Sans) load from Google Fonts. Without an internet connection the sheet falls back to Foundry's fonts.
-- Only character sheets are restyled. NPC, vehicle and group sheets are untouched.
+- Character and NPC sheets are restyled. Vehicle and group sheets are untouched.

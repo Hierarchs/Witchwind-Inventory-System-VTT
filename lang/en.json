@@ -2,8 +2,8 @@
   "WITCHWIND": {
     "Settings": {
       "Enabled": {
-        "Name": "Restyle character inventory",
-        "Hint": "Show the dnd5e character sheet's inventory tab in the Witchwind style. This only changes your own view."
+        "Name": "Restyle actor sheets",
+        "Hint": "Show dnd5e character and NPC sheets in the Witchwind style. This only changes your own view."
       },
       "SlotSize": {
         "Name": "Slot size",

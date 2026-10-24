@@ -53,21 +53,22 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", applyTooltipStyle);
-Hooks.on("renderCharacterActorSheet", onRenderCharacterSheet);
+Hooks.on("renderCharacterActorSheet", onRenderActorSheet);
+Hooks.on("renderNPCActorSheet", onRenderActorSheet);
 
 /* -------------------------------------------- */
 /*  Rendering                                   */
 /* -------------------------------------------- */
 
 /**
- * Decorate the character sheet's inventory tab after each render.
+ * Theme a character or NPC sheet and decorate its inventory tab after each render.
  * @param {ApplicationV2} app
  * @param {HTMLElement} element
  */
-function onRenderCharacterSheet(app, element) {
+function onRenderActorSheet(app, element) {
   element.classList.add("ww-sheet");
   const enabled = game.settings.get(MODULE_ID, "enabled");
-  element.classList.toggle("ww-inventory", enabled);
+  element.classList.toggle("ww-theme", enabled);
   if ( !enabled ) return;
 
   const tab = element.querySelector('.tab[data-tab="inventory"]');

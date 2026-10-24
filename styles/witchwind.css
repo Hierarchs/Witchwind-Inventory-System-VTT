@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;1,400&family=Alegreya+Sans:wght@400;500;700&family=Cinzel:wght@500;700&display=swap");
 
 /* ============================================ */
-/*  Witchwind Inventory                         */
+/*  Witchwind                                   */
 /* ============================================ */
 
 :root {
@@ -23,6 +23,10 @@
   --ww-parch-muted: #6a5a43;
   --ww-parch-head: #5a2e14;
 
+  /* Fine brown grain laid over the dark ground, like worn leather. */
+  --ww-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .31 0 0 0 0 .18 0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --ww-leather: #120f0b var(--ww-grain);
+
   --ww-font-display: "Cinzel", "Modesto Condensed", serif;
   --ww-font-body: "Alegreya", Georgia, serif;
   --ww-font-ui: "Alegreya Sans", "Signika", sans-serif;
@@ -37,88 +41,302 @@
 [data-ww-rarity="artifact"] { --ww-frame: #c4473a; --ww-tint: #2a1512; --ww-rarity-text: #e0644f; }
 
 /* -------------------------------------------- */
-/*  Inventory tab                               */
+/*  Whole sheet: dnd5e's palette, remapped      */
 /* -------------------------------------------- */
 
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] {
-  /* Recolor dnd5e's own components through the variables they read. */
+/*
+ * dnd5e builds its dark theme from a handful of base colors and its light theme from a few more.
+ * Pointing those, and the variables derived from them, at Witchwind colors restyles almost every
+ * card, input, pill and list on the sheet in either theme.
+ */
+.dnd5e2.sheet.actor.ww-theme {
+  /* Base palette */
+  --dnd5e-color-blue-white: var(--ww-ink);
+  --dnd5e-color-blue-gray-1: var(--ww-line);
+  --dnd5e-color-blue-gray-2: var(--ww-panel);
+  --dnd5e-color-blue-gray-3: var(--ww-line-strong);
+  --dnd5e-color-blue-gray-4: #0f0d0a;
+  --dnd5e-color-dark-gray: #0f0d0a;
+  --dnd5e-color-gold: var(--ww-gold);
+  --dnd5e-color-hd-1: var(--ww-raised);
+  --dnd5e-color-hd-2: var(--ww-panel);
+
+  /* Art and backgrounds */
+  --dnd5e-application-background: var(--ww-leather);
+  --dnd5e-character-background-content: none;
+  --dnd5e-character-background-image: none;
+  --dnd5e-character-header-image: none;
+  --dnd5e-character-body-image: none;
+  --dnd5e-npc-header-content: none;
+  --dnd5e-npc-header-image: none;
+  --dnd5e-background-card: var(--ww-panel);
+  --dnd5e-background-parchment: var(--ww-panel);
+  --dnd5e-background-5: rgb(201 164 92 / 6%);
+  --dnd5e-background-alt-1: var(--ww-raised);
+  --dnd5e-background-alt-2: var(--ww-panel);
+  --dnd5e-gold-icon-background: var(--ww-slot-bg);
+  --dnd5e-card-header-1: var(--ww-raised);
+  --dnd5e-card-header-2: var(--ww-panel);
+  --meter-background: #0f0d0a;
+  --filigree-background-color: var(--ww-panel);
+  --filigree-border-color: var(--ww-line-strong);
+
+  /* Borders */
+  --dnd5e-border-gold: 1px solid var(--ww-line);
+  --dnd5e-border-dotted: 1px dotted var(--ww-line-strong);
+  --dnd5e-border-dashed: 1px dashed var(--ww-line-strong);
+  --dnd5e-border-dashed-faint: 1px dashed var(--ww-line);
+  --dnd5e-border-dark: 1px solid var(--ww-line-strong);
+  --dnd5e-border-heading-3: 1px solid var(--ww-line-strong);
+  --dnd5e-border-separator-faint: 1px solid var(--ww-line);
+  --dnd5e-border-separator-heavy: 1px solid var(--ww-line-strong);
+  --dnd5e-inventory-border: 1px solid var(--ww-line);
+  --dnd5e-slot-border: 1px solid var(--ww-line-strong);
+  --color-fieldset-border: var(--ww-line-strong);
+
+  /* Text */
+  --color-text-emphatic: #f3e9d2;
   --color-text-primary: var(--ww-ink);
   --color-text-secondary: var(--ww-ink-muted);
   --color-text-tertiary: var(--ww-ink-faint);
+  --color-text-title: var(--ww-gold);
   --color-shadow-primary: var(--ww-gold);
-  --dnd5e-color-gold: var(--ww-gold);
-  --dnd5e-background-card: var(--ww-panel);
-  --dnd5e-background-5: rgb(201 164 92 / 8%);
-  --dnd5e-background-alt-1: var(--ww-raised);
-  --dnd5e-border-gold: 1px solid var(--ww-line);
-  --dnd5e-inventory-border: 1px solid var(--ww-line);
-  --dnd5e-shadow-45: rgb(0 0 0 / 45%);
+  --dnd5e-attribute-color: var(--ww-ink);
+  --dnd5e-ability-color: var(--ww-gold);
+  --dnd5e-ability-mod-color: var(--ww-ink);
+  --dnd5e-heading-3-color: var(--ww-ink-muted);
+  --fieldset-legend-color: var(--ww-gold);
+
+  /* Controls, pills and lists */
+  --item-control-color: var(--ww-ink-faint);
+  --item-control-interactive-color: var(--ww-ink-muted);
+  --item-control-active-color: var(--ww-gold);
+  --item-control-header-color: var(--ww-gold);
+  --item-state-toggle-active: var(--ww-gold);
+  --activity-icon-color: var(--ww-gold);
+  --activity-row-border: 1px dotted var(--ww-line);
+  --activity-row-indent-color: var(--ww-line-strong);
+  --damage-icon-color: var(--ww-gold);
+  --pill-transparent-color: var(--ww-ink);
+  --pill-border: 1px solid var(--ww-line-strong);
+  --pill-colored-border: 1px solid var(--ww-line);
+  --pill-border-dotted: 1px solid var(--ww-line-strong);
+  --pill-background-color: var(--ww-raised);
+  --pill-colored-text-color: var(--ww-ink);
+  --separated-list-item-background-color: rgb(201 164 92 / 4%);
+  --separated-list-item-border-color: var(--ww-line);
+  --dnd5e-condition-hover: var(--ww-line-strong);
+  --filter-control-color: var(--ww-ink-faint);
+  --filter-control-active-color: var(--ww-gold);
+  --context-entry-hover-background: var(--ww-raised);
+  --control-button-text-color: var(--ww-gold);
+  --slide-toggle-track-color-unchecked: var(--ww-raised);
+  --slide-toggle-track-color-checked: var(--ww-gold);
+  --npc-header-input-background: rgb(0 0 0 / 45%);
+  --npc-portrait-toggle-on: var(--ww-gold);
+
+  /* Type */
   --dnd5e-font-roboto: var(--ww-font-ui);
   --dnd5e-font-roboto-condensed: var(--ww-font-display);
-  --dnd5e-card-header-1: var(--ww-raised);
-  --dnd5e-card-header-2: var(--ww-panel);
+  --dnd5e-font-roboto-slab: var(--ww-font-display);
+  --dnd5e-font-modesto: var(--ww-font-display);
+  --dnd5e-shadow-45: rgb(0 0 0 / 45%);
+  --color-scrollbar: var(--ww-line-strong);
 
+  border-color: var(--ww-line-strong);
+  font-family: var(--ww-font-ui);
+}
+
+/* Form fields get their colors set on the elements themselves, so they need their own rule. */
+.dnd5e2.sheet.actor.ww-theme :is(input:not([type="range"]), select, textarea) {
+  --input-background-color: rgb(0 0 0 / 30%);
+  --input-border-color: var(--ww-line);
+  --input-placeholder-color: var(--ww-ink-faint);
+}
+
+.dnd5e2.sheet.actor.ww-theme button {
+  --button-border-color: var(--ww-line);
+  --button-hover-border-color: var(--ww-line-strong);
+  --control-border-color: var(--ww-line-strong);
+}
+
+/* Cards: darker panels with a faint gold edge. */
+.dnd5e2.sheet.actor.ww-theme .card {
+  border: 1px solid var(--ww-line);
+  box-shadow: 0 0 8px rgb(0 0 0 / 50%);
+}
+
+.dnd5e2.sheet.actor.ww-theme .card > .header,
+.dnd5e2.sheet.actor.ww-theme .card .header:not(.items-header) {
+  background: var(--ww-raised) !important;
+  color: var(--ww-ink) !important;
+  border-bottom: 1px solid var(--ww-line);
+}
+
+.dnd5e2.sheet.actor.ww-theme :is(h3, h4) {
+  font-family: var(--ww-font-display);
+  letter-spacing: 0.04em;
+}
+
+/* -------------------------------------------- */
+/*  Sheet header                                */
+/* -------------------------------------------- */
+
+/* A double gold rule under the header: a border, a strip of leather, then a second line. */
+.dnd5e2.sheet.actor.character.ww-theme .sheet-header,
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header {
+  background: var(--ww-leather);
+  border-bottom: 1px solid var(--ww-gold-dim);
+  box-shadow:
+    inset 0 -50px 60px -30px rgb(0 0 0 / 55%),
+    0 3px 0 0 #120f0b,
+    0 4px 0 0 var(--ww-gold-dim);
+}
+
+.dnd5e2.sheet.actor.ww-theme .sheet-header .document-name {
+  font-family: var(--ww-font-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #efe3c8;
+  text-shadow: 0 2px 6px rgb(0 0 0 / 90%);
+}
+
+.dnd5e2.sheet.actor.ww-theme .sheet-header .class {
+  color: var(--ww-gold);
+  font-family: var(--ww-font-ui);
+  font-weight: 500;
+}
+
+.dnd5e2.sheet.actor.ww-theme .sheet-header .xp-label {
+  color: var(--ww-ink-muted);
+}
+
+.dnd5e2.sheet.actor.ww-theme .sheet-header .xp-bar {
+  background: #0f0d0a;
+  border-color: var(--ww-gold-dim);
+}
+
+.dnd5e2.sheet.actor.ww-theme .sheet-header .xp-bar::after {
+  background: var(--ww-gold);
+  box-shadow: none;
+}
+
+/* -------------------------------------------- */
+/*  Tabs                                        */
+/* -------------------------------------------- */
+
+/* Horizontal tab strip */
+.dnd5e2.sheet.actor.ww-theme :is(.sheet-tabs, nav.tabs:not(.tabs-right, .tabs-left)) > .item {
+  font-family: var(--ww-font-display);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ww-ink-muted);
+  text-shadow: none;
+  border-bottom: 2px solid transparent;
+}
+
+.dnd5e2.sheet.actor.ww-theme :is(.sheet-tabs, nav.tabs:not(.tabs-right, .tabs-left)) > .item:hover {
+  color: var(--ww-ink);
+}
+
+.dnd5e2.sheet.actor.ww-theme :is(.sheet-tabs, nav.tabs:not(.tabs-right, .tabs-left)) > .item.active {
+  color: var(--ww-gold);
+  font-weight: 700;
+  border-bottom-color: var(--ww-gold);
+}
+
+/* Vertical icon tabs on the window edge */
+.dnd5e2.sheet.actor.ww-theme nav.tabs:is(.tabs-right, .tabs-left) {
+  background: var(--ww-leather);
+  border-color: var(--ww-gold-dim);
+}
+
+.dnd5e2.sheet.actor.ww-theme nav.tabs:is(.tabs-right, .tabs-left) > .item {
+  color: var(--ww-ink-muted);
+  --icon-fill: var(--ww-ink-muted);
+}
+
+.dnd5e2.sheet.actor.ww-theme nav.tabs:is(.tabs-right, .tabs-left) > .item:is(.active, :hover) {
+  background: var(--ww-gold);
+  color: #1a140d;
+  --icon-fill: #1a140d;
+}
+
+/* -------------------------------------------- */
+/*  Sidebar                                     */
+/* -------------------------------------------- */
+
+.dnd5e2.sheet.actor.ww-theme .sidebar .card {
+  background: var(--ww-panel);
+  border: 1px solid var(--ww-line-strong);
+  box-shadow: 0 0 10px rgb(0 0 0 / 65%);
+}
+
+.dnd5e2.sheet.actor.ww-theme .sidebar .card .card-tab {
+  background: var(--ww-panel);
+}
+
+.dnd5e2.sheet.actor.ww-theme .sidebar .favorites > h3 {
+  color: var(--ww-ink-muted);
+}
+
+/* Portrait: thin gold frame inside a dark mat. */
+.dnd5e2.sheet.actor.ww-theme .portrait > :is(img, video) {
+  border: 1px solid var(--ww-gold-dim);
+  box-shadow: 0 0 0 3px #0f0d0a, 0 0 0 4px var(--ww-line-strong);
+}
+
+/* -------------------------------------------- */
+/*  Inventory tab                               */
+/* -------------------------------------------- */
+
+.dnd5e2.ww-theme .tab[data-tab="inventory"] {
   padding: 12px;
   color: var(--ww-ink);
-  font-family: var(--ww-font-ui);
   background: var(--ww-ground);
   border: 1px solid var(--ww-line-strong);
   border-radius: 6px;
   box-shadow: inset 0 0 32px rgb(0 0 0 / 55%);
 }
 
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] :is(.card, .items-section) {
+.dnd5e2.ww-theme .tab[data-tab="inventory"] :is(.card, .items-section) {
   background: var(--ww-panel);
   border: 1px solid var(--ww-line);
   box-shadow: none;
 }
 
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] :is(h3, .items-header .item-name) {
-  font-family: var(--ww-font-display);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  color: var(--ww-ink-muted);
-}
-
-/* Section headers. Sheet themes can recolor these, so the theme here has to win. */
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] .items-header {
+/* Section headers, on every tab. Sheet themes can recolor these, so ours has to win. */
+.dnd5e2.ww-theme .items-header {
   background: var(--ww-raised) !important;
   color: var(--ww-ink-muted) !important;
   border-bottom: 1px solid var(--ww-line);
 }
 
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] .items-header :is(h3, .item-name, .item-header) {
+.dnd5e2.ww-theme .items-header :is(h3, .item-name, .item-header) {
+  font-family: var(--ww-font-display);
+  font-weight: 700;
+  letter-spacing: 0.05em;
   color: var(--ww-ink-muted) !important;
   text-shadow: none !important;
 }
 
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] input:is([type="text"], [type="search"], [type="number"]),
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] select {
-  color: var(--ww-ink);
-  font-family: var(--ww-font-ui);
-}
-
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] item-list-controls :is(input[type="search"], input[type="text"]) {
+.dnd5e2.ww-theme .tab[data-tab="inventory"] item-list-controls :is(input[type="search"], input[type="text"]) {
   background: var(--ww-panel);
   border: 1px solid var(--ww-line);
   border-radius: 3px;
 }
 
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] ::placeholder {
-  color: var(--ww-ink-muted);
-}
-
 /* Encumbrance bar */
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] .encumbrance .meter.progress {
+.dnd5e2.ww-theme .encumbrance .meter.progress {
   background: var(--ww-raised);
   border-color: var(--ww-line);
 }
 
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] .encumbrance .meter.progress::before {
+.dnd5e2.ww-theme .encumbrance .meter.progress::before {
   background: var(--ww-gold);
 }
 
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] .encumbrance .label {
+.dnd5e2.ww-theme .encumbrance .label {
   color: var(--ww-ink);
   font-family: var(--ww-font-ui);
   font-weight: 500;
@@ -126,21 +344,21 @@
 }
 
 /* Currency */
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] section.currency {
+.dnd5e2.ww-theme section.currency {
   background: var(--ww-panel);
   border: 1px solid var(--ww-line);
   border-radius: 4px;
   box-shadow: none;
 }
 
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] section.currency input {
+.dnd5e2.ww-theme section.currency input {
   color: var(--ww-ink);
   font-family: var(--ww-font-ui);
   font-weight: 500;
 }
 
 /* Containers along the top */
-.dnd5e2.ww-inventory .tab[data-tab="inventory"] .containers .container {
+.dnd5e2.ww-theme .tab[data-tab="inventory"] .containers .container {
   background: var(--ww-tint, var(--ww-slot-bg));
   border: 2px solid var(--ww-frame, var(--ww-line));
   border-radius: 3px;
@@ -151,7 +369,7 @@
 /*  Layout controls                             */
 /* -------------------------------------------- */
 
-.dnd5e2.ww-inventory .inventory-element .middle {
+.dnd5e2.ww-theme .inventory-element .middle {
   align-items: center;
 }
 
@@ -250,7 +468,7 @@
 /* -------------------------------------------- */
 
 /* Flatten dnd5e's sections into one grid so every item becomes a slot. */
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list {
   display: grid;
   /* Tracks stretch to fill the row so the section dividers reach the right edge; slots stay square inside them. */
   grid-template-columns: repeat(auto-fill, minmax(var(--ww-slot, 56px), 1fr));
@@ -264,17 +482,17 @@
   box-shadow: inset 0 0 24px rgb(0 0 0 / 50%);
 }
 
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list :is(.items-section, .item-list) {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list :is(.items-section, .item-list) {
   display: contents;
 }
 
 /* dnd5e's search and filters hide entries with the hidden attribute. */
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list :is(.items-section, .item)[hidden] {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list :is(.items-section, .item)[hidden] {
   display: none !important;
 }
 
 /* Section names become dividers across the grid. */
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-header {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-header {
   grid-column: 1 / -1;
   justify-self: stretch;
   display: flex;
@@ -287,29 +505,29 @@
   box-shadow: none !important;
 }
 
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-section:first-child .items-header {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-section:first-child .items-header {
   padding-top: 0;
 }
 
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-header::after {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-header::after {
   content: "";
   flex: 1;
   height: 1px;
   background: var(--ww-line);
 }
 
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-header .item-name {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-header .item-name {
   flex: 0 0 auto;
   padding: 0;
   font-size: var(--font-size-12, 12px);
 }
 
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-header > :not(.item-name) {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-header > :not(.item-name) {
   display: none;
 }
 
 /* The slot */
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item {
   position: relative;
   width: var(--ww-slot, 56px);
   height: var(--ww-slot, 56px);
@@ -321,28 +539,28 @@
   transition: filter 150ms ease, box-shadow 150ms ease;
 }
 
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item:hover {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item:hover {
   filter: brightness(1.15);
   box-shadow: inset 0 2px 6px rgb(0 0 0 / 55%), 0 0 0 1px var(--ww-gold), 0 0 12px rgb(201 164 92 / 40%);
 }
 
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item .item-row {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-row {
   height: 100%;
 }
 
 /* Sheet themes can add accent bars or backgrounds to rows; a slot doesn't want them. */
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item :is(.item-row, .item-name) {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item :is(.item-row, .item-name) {
   background: none !important;
   border: none !important;
   box-shadow: none !important;
 }
 
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item :is(.item-row, .item-name)::before,
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name::after {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item :is(.item-row, .item-name)::before,
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name::after {
   display: none !important;
 }
 
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name {
   width: 100%;
   height: 100%;
   padding: 0;
@@ -351,13 +569,13 @@
 }
 
 /* Keep only the picture; the name and details live on the hover card. */
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name > :not(.item-image, .concentration),
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item .item-row > :not(.item-name),
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item .item-description {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name > :not(.item-image, .concentration),
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-row > :not(.item-name),
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-description {
   display: none;
 }
 
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item .item-image {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-image {
   --icon-size: calc(var(--ww-slot, 56px) - 10px);
   width: calc(var(--ww-slot, 56px) - 10px);
   height: calc(var(--ww-slot, 56px) - 10px);
@@ -369,7 +587,7 @@
 }
 
 /* Equipped: gold diamond, top left */
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-equipped]::before {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-equipped]::before {
   content: "";
   position: absolute;
   z-index: 2;
@@ -384,7 +602,7 @@
 }
 
 /* Quantity: bottom right */
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-qty]::after {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-qty]::after {
   content: attr(data-ww-qty);
   position: absolute;
   z-index: 2;
@@ -397,7 +615,7 @@
 }
 
 /* Attuned: violet star, top right */
-.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-attuned] .item-row::after {
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-attuned] .item-row::after {
   content: "";
   position: absolute;
   z-index: 2;
@@ -411,35 +629,33 @@
 }
 
 /* -------------------------------------------- */
-/*  List view                                   */
+/*  Lists (list view, features, spells)         */
 /* -------------------------------------------- */
 
-.dnd5e2.ww-inventory.ww-list .tab[data-tab="inventory"] .items-section {
+.dnd5e2.ww-theme:not(.ww-grid) .tab[data-tab="inventory"] .items-section,
+.dnd5e2.ww-theme .tab:not([data-tab="inventory"]) .items-section {
   border-radius: 4px;
   overflow: hidden;
 }
 
-.dnd5e2.ww-inventory.ww-list .tab[data-tab="inventory"] .items-header {
-  border-bottom: 1px solid var(--ww-line);
-}
-
-.dnd5e2.ww-inventory.ww-list .tab[data-tab="inventory"] .item:not(:last-child) {
+.dnd5e2.ww-theme .items-section .item:not(:last-child) {
   border-bottom: 1px solid var(--ww-raised);
 }
 
-.dnd5e2.ww-inventory.ww-list .tab[data-tab="inventory"] .item .item-image {
+.dnd5e2.ww-theme:not(.ww-grid) .items-section .item .item-image,
+.dnd5e2.ww-theme .tab:not([data-tab="inventory"]) .items-section .item .item-image {
   box-sizing: border-box;
   border: 2px solid var(--ww-frame, var(--ww-line));
   border-radius: 3px;
 }
 
-.dnd5e2.ww-inventory.ww-list .tab[data-tab="inventory"] .item .title {
+.dnd5e2.ww-theme .items-section .item .title {
   font-family: var(--ww-font-ui);
   font-size: var(--font-size-14, 14px);
   font-weight: 500;
 }
 
-.dnd5e2.ww-inventory.ww-list .tab[data-tab="inventory"] .item .subtitle {
+.dnd5e2.ww-theme .items-section .item[data-ww-rarity] .subtitle {
   color: var(--ww-rarity-text, var(--ww-ink-muted));
 }
 
