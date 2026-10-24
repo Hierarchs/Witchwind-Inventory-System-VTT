@@ -12,6 +12,8 @@ A restyle of dnd5e character and NPC sheets, inspired by The Witcher 3 and Morro
 - **Spells tab.** The same treatment: gold figures on the spellcasting cards, gold slot pips, and a detail panel with level and school, casting time, range, target, duration, components, concentration or ritual, damage or healing, and a Cast button.
 - **Effects and Biography.** Effects use the same list styling; active conditions glow gold. The biography reads as a parchment page with a double gold rule, with the editing toolbar on leather above it.
 - **Bags and other containers.** A container's own window gets the leather header and the same slot grid for its contents, with a footer showing its capacity and coins.
+- **Item sheets.** Weapons, spells, feats and every other item window get the leather header and theme; descriptions read as parchment pages.
+- **Chat cards.** Roll, attack and item cards in chat become parchment (or dark steel) with a double rule, Cinzel headings and solid buttons. Success and failure keep a green or red tint, and whispers, blind rolls and emotes keep their colored edge.
 - **Footer.** Carried weight, attunement and coins sit in one bar along the bottom.
 - **Resizable.** A slider on the inventory tab sets the slot size (44 to 80 px). Each player's choice is saved on their own device.
 - **Grid or list.** A toggle switches back to dnd5e's rows, restyled to match.
@@ -46,7 +48,8 @@ Under **Configure Settings > Witchwind Inventory**:
 
 | Setting | What it does |
 |---|---|
-| Restyle actor sheets | Turns the restyle on or off for you. |
+| Restyle sheets | Turns the sheet restyle on or off for you. |
+| Chat card style | Parchment, Steel, or dnd5e default for chat cards. |
 | Slot size | Default slot size in grid view. |
 | Item card style | Parchment, Steel, or dnd5e default. |
 
