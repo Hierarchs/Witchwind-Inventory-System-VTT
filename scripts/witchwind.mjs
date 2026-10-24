@@ -70,7 +70,10 @@ Hooks.once("init", () => {
   });
 });
 
-Hooks.once("ready", applyTooltipStyle);
+Hooks.once("ready", () => {
+  applyTooltipStyle();
+  watchTooltips();
+});
 Hooks.on("renderCharacterActorSheet", onRenderActorSheet);
 Hooks.on("renderNPCActorSheet", onRenderActorSheet);
 
@@ -336,17 +339,8 @@ function observeLayout(tab, inventory, state) {
     const docked = inventory.clientWidth >= DOCK_WIDTH;
     if ( docked !== tab.classList.contains("ww-docked") ) {
       tab.classList.toggle("ww-docked", docked);
-      // With the panel docked, the hover card would only repeat it. dnd5e attaches the card as a
-      // data-tooltip attribute at render, so set that aside while docked and restore it when not.
-      for ( const name of list.querySelectorAll(".item .item-name") ) {
-        if ( docked && ("tooltip" in name.dataset) ) {
-          name.dataset.wwTooltip = name.dataset.tooltip;
-          delete name.dataset.tooltip;
-        } else if ( !docked && ("wwTooltip" in name.dataset) ) {
-          name.dataset.tooltip = name.dataset.wwTooltip;
-          delete name.dataset.wwTooltip;
-        }
-      }
+      // With the panel docked, the hover card would only repeat it.
+      for ( const el of list.querySelectorAll(".item-tooltip, [data-ww-tooltips]") ) suppressTooltip(el, docked);
     }
     fillSlots(tab);
   };
@@ -456,6 +450,42 @@ function refreshSheets() {
 
 function rerenderSheets() {
   for ( const app of openSheets() ) app.render();
+}
+
+/** Data attributes Foundry reads hover card content from. */
+const TOOLTIP_KEYS = ["tooltip", "tooltipHtml", "tooltipText"];
+
+/**
+ * Set an element's hover card attributes aside, or put them back.
+ * @param {HTMLElement} el
+ * @param {boolean} suppressed
+ */
+function suppressTooltip(el, suppressed) {
+  if ( suppressed ) {
+    const saved = {};
+    for ( const key of TOOLTIP_KEYS ) {
+      if ( !(key in el.dataset) ) continue;
+      saved[key] = el.dataset[key];
+      delete el.dataset[key];
+    }
+    if ( Object.keys(saved).length ) el.dataset.wwTooltips = JSON.stringify(saved);
+  } else if ( el.dataset.wwTooltips ) {
+    Object.assign(el.dataset, JSON.parse(el.dataset.wwTooltips));
+    delete el.dataset.wwTooltips;
+  }
+}
+
+/**
+ * Close any hover card that opens for an item in a docked inventory, however it was attached.
+ * Covers cards dnd5e adds after render, which suppressTooltip can't see in advance.
+ */
+function watchTooltips() {
+  const tooltip = game.tooltip?.tooltip ?? document.getElementById("tooltip");
+  if ( !tooltip ) return;
+  new MutationObserver(() => {
+    if ( !tooltip.classList.contains("active") ) return;
+    if ( game.tooltip.element?.closest?.(".ww-theme .tab.ww-docked .items-list") ) game.tooltip.deactivate();
+  }).observe(tooltip, { attributeFilter: ["class"] });
 }
 
 function applyTooltipStyle() {

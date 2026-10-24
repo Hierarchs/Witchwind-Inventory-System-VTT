@@ -1024,10 +1024,24 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
   display: none !important;
 }
 
-/* Some sheet layouts paint a colored band behind the tab names. */
+/*
+ * Some sheet layouts (yours adds a horizontal tab strip) paint a colored band behind the tab names,
+ * either on the strip itself, on whatever wraps it, or on the window content. Let the leather through.
+ */
 .dnd5e2.sheet.actor.ww-theme :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs) {
   background: var(--ww-leather) !important;
   border-color: var(--ww-line) !important;
+}
+
+.dnd5e2.sheet.actor.ww-theme :has(> :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs)),
+.dnd5e2.sheet.actor.ww-theme .window-content,
+.dnd5e2.sheet.actor.ww-theme .sheet-body {
+  background: transparent !important;
+}
+
+.dnd5e2.sheet.actor.ww-theme :has(> :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs))::before,
+.dnd5e2.sheet.actor.ww-theme :has(> :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs))::after {
+  background: none !important;
 }
 
 /* -------------------------------------------- */
