@@ -610,8 +610,22 @@
   display: none !important;
 }
 
-/* Empty slots that pad out the grid. */
+/*
+ * Slots run in type order (weapons, equipment, consumables, tools, containers, loot, anything else),
+ * whatever dnd5e's grouping and sort controls are set to. Within a type, dnd5e's own order is kept.
+ * This only changes the display order, so dnd5e's drag-to-reorder and saved sort are left alone.
+ */
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item { order: 7; }
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-type="weapon"] { order: 1; }
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-type="equipment"] { order: 2; }
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-type="consumable"] { order: 3; }
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-type="tool"] { order: 4; }
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-type="container"] { order: 5; }
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item[data-ww-type="loot"] { order: 6; }
+
+/* Empty slots that pad out the grid, always after the items. */
 .dnd5e2.ww-theme .ww-fillers { display: contents; }
+.dnd5e2.ww-theme .ww-filler { order: 99; }
 
 .dnd5e2.ww-theme .ww-filler {
   width: var(--ww-slot, 56px);
