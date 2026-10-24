@@ -106,19 +106,42 @@ function onRenderActorSheet(app, element) {
 
   const tab = element.querySelector('.tab[data-tab="inventory"]');
   const inventory = tab?.querySelector(".inventory-element");
-  if ( !inventory ) return;
+  if ( inventory ) {
+    const state = tabState(app, "inventory");
+    annotateItems(app.actor, tab);
+    fitPictures(tab);
+    injectControls(tab);
+    injectCategories(tab, inventory, state);
+    buildFooter(app.actor, tab, inventory);
+    injectDetailPanel(app, tab, inventory, state);
+    observeLayout(tab, inventory, state);
+  }
 
-  let state = sheetStates.get(app);
-  if ( !state ) sheetStates.set(app, state = { category: "all", selected: null, observers: [], details: new Map() });
+  // Features stay a list, with uses as pips and the same docked detail panel.
+  const featuresTab = element.querySelector('.tab[data-tab="features"]');
+  const features = featuresTab?.querySelector(".inventory-element");
+  if ( features ) {
+    const state = tabState(app, "features");
+    annotateItems(app.actor, featuresTab);
+    decorateUses(app.actor, featuresTab);
+    injectDetailPanel(app, featuresTab, features, state);
+    observeLayout(featuresTab, features, state);
+  }
 
-  annotateItems(app.actor, tab);
-  fitPictures(tab);
-  injectControls(tab);
-  injectCategories(tab, inventory, state);
-  buildFooter(app.actor, tab, inventory);
-  injectDetailPanel(app, tab, inventory, state);
   applySheetState(element);
-  observeLayout(tab, inventory, state);
+}
+
+/**
+ * UI state for one tab of one sheet, kept across re-renders.
+ * @param {ApplicationV2} app
+ * @param {string} id  The tab, such as "inventory" or "features".
+ */
+function tabState(app, id) {
+  let tabs = sheetStates.get(app);
+  if ( !tabs ) sheetStates.set(app, tabs = new Map());
+  let state = tabs.get(id);
+  if ( !state ) tabs.set(id, state = { category: "all", selected: null, observers: [], details: new Map() });
+  return state;
 }
 
 /**
@@ -126,10 +149,10 @@ function onRenderActorSheet(app, element) {
  * @param {ApplicationV2} app
  */
 function onCloseActorSheet(app) {
-  const state = sheetStates.get(app);
-  if ( !state ) return;
-  for ( const observer of state.observers ) observer.disconnect();
-  state.observers = [];
+  for ( const state of sheetStates.get(app)?.values() ?? [] ) {
+    for ( const observer of state.observers ) observer.disconnect();
+    state.observers = [];
+  }
 }
 
 /**
@@ -149,6 +172,52 @@ function annotateItems(actor, root) {
 
     if ( Number.isNumeric(quantity) && (Number(quantity) !== 1) ) el.dataset.wwQty = quantity;
     else delete el.dataset.wwQty;
+  }
+}
+
+/** Features with more uses than this keep dnd5e's number instead of pips. */
+const MAX_PIPS = 12;
+
+/**
+ * Show limited uses as a row of pips, like the attunement dots. Clicking a pip sets the remaining uses
+ * by writing to dnd5e's own uses field and letting dnd5e save it, so nothing bypasses its handling.
+ * @param {Actor} actor
+ * @param {HTMLElement} tab
+ */
+function decorateUses(actor, tab) {
+  for ( const column of tab.querySelectorAll(".items-list li.item[data-item-id] .item-uses:not(.empty)") ) {
+    // Recharge and cooldown variants show an icon rather than value / max; leave those alone.
+    if ( !column.querySelector(".max") || column.querySelector(".ww-uses-pips") ) continue;
+    const item = actor?.items.get(column.closest("li.item").dataset.itemId);
+    const uses = item?.system.uses;
+    const max = Number(uses?.max);
+    if ( !max || (max > MAX_PIPS) ) continue;
+
+    const value = Math.clamp(Number(uses.value) || 0, 0, max);
+    const input = column.querySelector("input");
+    const pips = document.createElement("span");
+    pips.className = "ww-uses-pips";
+    pips.setAttribute("role", "group");
+    pips.setAttribute("aria-label", `${t("Uses")}: ${value} / ${max}`);
+    for ( let n = 1; n <= max; n++ ) {
+      // Without an editable field (a locked sheet) the pips only display.
+      const pip = document.createElement(input ? "button" : "span");
+      pip.className = `ww-use-pip${n <= value ? " filled" : ""}`;
+      if ( input ) {
+        pip.type = "button";
+        pip.classList.add("always-interactive");
+        pip.setAttribute("aria-label", `${n} / ${max}`);
+        pip.addEventListener("click", event => {
+          event.stopPropagation();
+          // Clicking a lit pip spends down to below it; clicking an unlit one restores up to it.
+          input.value = String(value >= n ? n - 1 : n);
+          input.dispatchEvent(new Event("change"));
+        });
+      }
+      pips.append(pip);
+    }
+    column.classList.add("ww-has-pips");
+    column.append(pips);
   }
 }
 
@@ -440,7 +509,9 @@ async function detailHTML(item) {
     system.type?.label || loc(CONFIG.Item.typeLabels?.[item.type])
   ].filter(Boolean).join(" · ");
   const key = concealed ? null : headlineStat(item, labels);
-  const stats = concealed ? physicalStats(item) : [...combatStats(item, labels), ...physicalStats(item), ...stateStats(item)];
+  const stats = concealed ? physicalStats(item) : [
+    ...actionStats(item, labels, key), ...combatStats(item, labels), ...physicalStats(item), ...stateStats(item, key)
+  ];
   const description = await enrich(concealed ? system.unidentified?.description : system.description?.value, item);
 
   return `
@@ -479,8 +550,30 @@ function headlineStat(item, labels) {
   if ( (item.type === "tool") && system.ability ) {
     return { label: t("Check"), value: loc(CONFIG.DND5E.abilities?.[system.ability]) };
   }
-  if ( system.uses?.max ) return { label: t("Uses"), value: `${system.uses.value ?? 0} / ${system.uses.max}` };
+  if ( system.uses?.max ) return { label: t("Uses"), value: usesText(item) };
+  if ( isText(labels.activation) && !("quantity" in system) ) return { label: t("Activation"), value: labels.activation };
   return null;
+}
+
+/** "2 / 3 · Long Rest": uses left and how they come back. */
+function usesText(item) {
+  const { value = 0, max } = item.system.uses;
+  return [`${value} / ${max}`, isText(item.labels?.recovery) ? item.labels.recovery : ""].filter(Boolean).join(" · ");
+}
+
+function isText(value) {
+  return (typeof value === "string") && (value.trim() !== "");
+}
+
+/** How a feature is used: activation, target, duration and prerequisites. Gear skips these. */
+function actionStats(item, labels, key) {
+  if ( "quantity" in item.system ) return [];
+  const stats = [];
+  if ( isText(labels.activation) && (key?.label !== t("Activation")) ) stats.push([t("Activation"), labels.activation]);
+  if ( isText(labels.target) ) stats.push([t("Target"), labels.target]);
+  if ( isText(labels.duration) ) stats.push([t("Duration"), labels.duration]);
+  if ( isText(item.system.requirements) ) stats.push([t("Requirements"), item.system.requirements]);
+  return stats;
 }
 
 function armorText(system) {
@@ -526,22 +619,17 @@ function physicalStats(item) {
   return stats;
 }
 
-/** Charges, attunement and whether it's equipped. */
-function stateStats(item) {
+/** Charges, recharge, attunement and whether it's equipped. */
+function stateStats(item, key) {
   const system = item.system;
   const stats = [];
-  if ( system.uses?.max && (item.type !== "tool") && !headlineIsUses(item) ) {
-    stats.push([t("Uses"), `${system.uses.value ?? 0} / ${system.uses.max}`]);
-  }
+  if ( system.uses?.max && (item.type !== "tool") && (key?.label !== t("Uses")) ) stats.push([t("Uses"), usesText(item)]);
+  if ( isText(item.labels?.recharge) ) stats.push([t("Recharge"), item.labels.recharge]);
   if ( system.attunement ) {
     stats.push([t("Attunement"), system.attuned ? t("Attuned") : loc(CONFIG.DND5E.attunementTypes?.[system.attunement])]);
   }
   if ( "equipped" in system ) stats.push([t("Status"), t(system.equipped ? "Equipped" : "Carried")]);
   return stats;
-}
-
-function headlineIsUses(item) {
-  return headlineStat(item, item.labels ?? {})?.label === t("Uses");
 }
 
 async function enrich(html, item) {
@@ -589,7 +677,9 @@ function observeLayout(tab, inventory, state) {
  * @param {HTMLElement} tab
  */
 function fillSlots(tab) {
-  const list = tab?.querySelector(".inventory-element .items-list");
+  // Only the inventory is a grid; the Features list never gets empty slots.
+  if ( tab?.dataset.tab !== "inventory" ) return;
+  const list = tab.querySelector(".inventory-element .items-list");
   if ( !list ) return;
   let fillers = list.querySelector(":scope > .ww-fillers");
   if ( !tab.closest(".ww-sheet")?.classList.contains("ww-grid") ) {

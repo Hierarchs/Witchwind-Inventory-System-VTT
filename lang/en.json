@@ -50,6 +50,11 @@
     "Quantity": "Quantity",
     "Attunement": "Attunement",
     "Status": "Status",
+    "Activation": "Activation",
+    "Target": "Target",
+    "Duration": "Duration",
+    "Requirements": "Requirements",
+    "Recharge": "Recharge",
     "Equipped": "Equipped"
   }
 }

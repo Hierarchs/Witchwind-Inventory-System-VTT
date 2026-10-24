@@ -8,6 +8,7 @@ A restyle of dnd5e character and NPC sheets, inspired by The Witcher 3 and Morro
 - **Pictures fill their slots.** Each picture is measured once: art on its own background is zoomed to fill the slot, and cut-out objects are shown whole at the largest size that fits, ignoring any transparent margins.
 - **Legendary and artifact glow.** Their slots carry a slowly breathing orange or red halo. Animations are short and switch off if your system asks for reduced motion.
 - **Detail panel.** When the sheet is wide enough, a parchment panel beside the grid shows the item you're hovering, with Use, Equip and Attune buttons. On narrower sheets the hover card does the same job.
+- **Features tab.** Kept as a list, in the same dark panel. Limited uses show as pips you can click to spend or restore, class badges become leather plaques, and the detail panel shows a feature's activation, target, duration, uses and recovery, requirements and description.
 - **Footer.** Carried weight, attunement and coins sit in one bar along the bottom.
 - **Resizable.** A slider on the inventory tab sets the slot size (44 to 80 px). Each player's choice is saved on their own device.
 - **Grid or list.** A toggle switches back to dnd5e's rows, restyled to match.
