@@ -48,8 +48,13 @@
  * dnd5e builds its dark theme from a handful of base colors and its light theme from a few more.
  * Pointing those, and the variables derived from them, at Witchwind colors restyles almost every
  * card, input, pill and list on the sheet in either theme.
+ *
+ * dnd5e declares its theme again on themed elements inside the window, not just on the window itself,
+ * so these overrides are declared at each of those levels too; otherwise dnd5e's values sit closer to
+ * the content and win (that's what kept the blue ability badges and dark frames).
  */
-.dnd5e2.sheet.actor.ww-theme {
+.dnd5e2.sheet.actor.ww-theme,
+.dnd5e2.sheet.actor.ww-theme :is(.dnd5e2, .themed) {
   /* Base palette */
   --dnd5e-color-blue-white: var(--ww-ink);
   --dnd5e-color-blue-gray-1: var(--ww-line);
@@ -155,7 +160,9 @@
   --dnd5e-font-modesto: var(--ww-font-display);
   --dnd5e-shadow-45: rgb(0 0 0 / 45%);
   --color-scrollbar: var(--ww-line-strong);
+}
 
+.dnd5e2.sheet.actor.ww-theme {
   border-color: var(--ww-line-strong);
   font-family: var(--ww-font-ui);
 }
