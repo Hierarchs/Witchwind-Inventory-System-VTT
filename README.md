@@ -14,7 +14,8 @@ A restyle of dnd5e character and NPC sheets, inspired by The Witcher 3 and Morro
 - **Bags and other containers.** A container's own window gets the leather header and the same slot grid for its contents, with a footer showing its capacity and coins.
 - **Item sheets.** Weapons, spells, feats and every other item window get the leather header and theme; descriptions read as parchment pages.
 - **Chat cards.** Roll, attack and item cards in chat become parchment (or dark steel) with a double rule, Cinzel headings and solid buttons. Success and failure keep a green or red tint, and whispers, blind rolls and emotes keep their colored edge.
-- **Footer.** Carried weight, attunement and coins sit in one bar along the bottom.
+- **Footer.** Carried weight, attunement, total worth and coins sit in one bar along the bottom. The weight bar turns amber when encumbered, orange when heavily encumbered and red when over the limit.
+- **Compare and spot new loot.** Hovering an unequipped weapon or armor shows how it compares with what's equipped (average damage, or armor class with your Dexterity). Items you haven't looked at yet carry a small gold dot until you hover them.
 - **Resizable.** A slider on the inventory tab sets the slot size (44 to 80 px). Each player's choice is saved on their own device.
 - **Grid or list.** A toggle switches back to dnd5e's rows, restyled to match.
 - **Parchment item cards.** Hovering an item shows dnd5e's item card on parchment with a double gold rule. It can be switched to a dark steel style or the dnd5e default.
@@ -36,6 +37,10 @@ https://raw.githubusercontent.com/Hierarchs/Witchwind-Inventory-System-VTT/main/
 
 Then enable **Witchwind Inventory** in your world's module settings.
 
+## License
+
+The module's code is under the [MIT License](LICENSE). The bundled fonts are under the SIL Open Font License 1.1; each license is in `fonts/`.
+
 ## Releasing a new version
 
 1. Bump `version` in `module.json`.
@@ -55,5 +60,5 @@ Under **Configure Settings > Witchwind Inventory**:
 
 ## Notes
 
-- The fonts (Cinzel, Alegreya, Alegreya Sans) load from Google Fonts. Without an internet connection the sheet falls back to Foundry's fonts.
+- The fonts (Cinzel, Alegreya, Alegreya Sans) are bundled with the module, so the look doesn't depend on an internet connection.
 - Character and NPC sheets are restyled. Vehicle and group sheets are untouched.

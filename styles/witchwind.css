@@ -1,4 +1,54 @@
-@import url("https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;1,400&family=Alegreya+Sans:wght@400;500;700&family=Cinzel:wght@500;700&display=swap");
+/* -------------------------------------------- */
+/*  Fonts (bundled, Latin; SIL Open Font License, see fonts/OFL-*.txt) */
+/* -------------------------------------------- */
+
+@font-face {
+  font-family: "Cinzel";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("../fonts/cinzel-variable-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Alegreya";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("../fonts/alegreya-variable-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Alegreya";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/alegreya-italic-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Alegreya Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/alegreya-sans-400-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Alegreya Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/alegreya-sans-500-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Alegreya Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/alegreya-sans-700-latin.woff2") format("woff2");
+}
 
 /* ============================================ */
 /*  Witchwind                                   */
@@ -780,6 +830,35 @@
   pointer-events: none;
 }
 
+/* New: a small glowing gold dot, bottom left, until the item is hovered. */
+.dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item[data-ww-new] .item-name::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  z-index: 2;
+  left: 4px;
+  bottom: 4px;
+  width: 8px;
+  height: 8px;
+  background: var(--ww-gold);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--ww-ground), 0 0 6px 2px rgb(201 164 92 / 70%);
+  pointer-events: none;
+}
+
+/* In list view, the same gold dot after the item's name. */
+.dnd5e2.ww-theme:not(.ww-grid) .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item[data-ww-new] .item-name .title::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  vertical-align: middle;
+  background: var(--ww-gold);
+  border-radius: 50%;
+  box-shadow: 0 0 5px 1px rgb(201 164 92 / 70%);
+}
+
 /* Attuned: violet star, top right */
 .dnd5e2.ww-theme.ww-grid .tab:is([data-tab="inventory"], [data-tab="contents"]) .items-list .item[data-ww-attuned] .item-row::after {
   content: "";
@@ -934,6 +1013,40 @@
   block-size: auto;
   border: none;
   background: var(--ww-line-strong);
+}
+
+/* Encumbrance warning: the bar and figure turn amber, then orange, then red. */
+.dnd5e2.ww-theme .ww-footer .ww-carried[data-ww-load="encumbered"] { --ww-load: #d6a13a; }
+.dnd5e2.ww-theme .ww-footer .ww-carried[data-ww-load="heavy"] { --ww-load: #d97a2b; }
+.dnd5e2.ww-theme .ww-footer .ww-carried[data-ww-load="over"] { --ww-load: #d0503c; }
+
+.dnd5e2.ww-theme .ww-footer .ww-carried[data-ww-load] .encumbrance .meter.progress::before {
+  background: var(--ww-load) !important;
+}
+
+.dnd5e2.ww-theme .ww-footer .ww-carried[data-ww-load] .ww-carried-value {
+  color: var(--ww-load);
+  font-weight: 700;
+}
+
+/* Worth: what coins and carried items add up to. */
+.dnd5e2.ww-theme .ww-footer .ww-worth {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.dnd5e2.ww-theme .ww-footer .ww-worth-label {
+  font-family: var(--ww-font-display);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--ww-ink-muted);
+}
+
+.dnd5e2.ww-theme .ww-footer .ww-worth-value {
+  font-family: var(--ww-font-display);
+  font-weight: 700;
+  color: var(--ww-gold);
 }
 
 /* Attunement as in the concept: label, a pip per slot (filled violet when used), then the count. */
@@ -1230,6 +1343,45 @@ body.ww-tooltip-steel .ww-detail .ww-d-stats > div { border-bottom-color: rgb(20
 
 .ww-detail .ww-d-stats dt { flex: none; color: var(--color-text-secondary); }
 .ww-detail .ww-d-stats dd { margin: 0; text-align: right; font-weight: 500; color: var(--color-text-primary); }
+
+/* Comparison with what's equipped: gold-green when better, red-brown when worse. */
+.ww-detail .ww-d-compare {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  padding: 8px 10px;
+  border: 1px solid rgb(90 62 30 / 30%);
+  border-radius: 3px;
+  background: rgb(0 0 0 / 5%);
+  font-family: var(--ww-font-ui);
+}
+
+.ww-detail .ww-d-compare-label {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.ww-detail .ww-d-compare-value {
+  font-family: var(--ww-font-display);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.ww-detail .ww-d-compare-detail {
+  align-self: center;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.ww-detail .ww-d-compare.better .ww-d-compare-value { color: #3d6a1e; }
+.ww-detail .ww-d-compare.worse .ww-d-compare-value { color: #8a2a1a; }
+.ww-detail .ww-d-compare.same .ww-d-compare-value { color: var(--color-text-secondary); }
+body.ww-tooltip-steel .ww-detail .ww-d-compare { border-color: rgb(201 164 92 / 20%); background: rgb(0 0 0 / 20%); }
+body.ww-tooltip-steel .ww-detail .ww-d-compare.better .ww-d-compare-value { color: #8fd488; }
+body.ww-tooltip-steel .ww-detail .ww-d-compare.worse .ww-d-compare-value { color: #e0644f; }
 
 /* Description: dnd5e's rules text, which can be long; the panel scrolls rather than growing. */
 .ww-detail .ww-d-desc {

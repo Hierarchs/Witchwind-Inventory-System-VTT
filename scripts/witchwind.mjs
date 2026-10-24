@@ -95,6 +95,13 @@ Hooks.once("init", () => {
     default: "grid",
     onChange: refreshSheets
   });
+
+  // Item ids each owner's items this user has already looked at, for the "new item" marks.
+  register("seenItems", {
+    config: false,
+    type: Object,
+    default: {}
+  });
 });
 
 Hooks.once("ready", () => {
@@ -131,10 +138,15 @@ function onRenderActorSheet(app, element) {
   if ( inventory ) {
     const state = tabState(app, "inventory");
     annotateItems(find, tab);
+    markNewItems(app.actor?.uuid, app.actor?.items, tab);
     fitPictures(tab);
     injectControls(tab);
     injectCategories(tab, inventory, state);
-    buildFooter(tab, inventory, attunementBlock(app.actor), "Carried");
+    buildFooter(tab, inventory, {
+      weightLabel: "Carried",
+      attunement: attunementBlock(app.actor),
+      worth: worthBlock(actorWorth(app.actor))
+    });
     injectDetailPanel(find, tab, inventory, state);
     observeLayout(tab, inventory, state);
   }
@@ -183,9 +195,10 @@ function onRenderContainerSheet(app, element) {
   if ( inventory ) {
     const state = tabState(app, "contents");
     annotateItems(find, tab);
+    markNewItems(container?.actor?.uuid ?? container?.uuid, container?.actor?.items ?? null, tab);
     fitPictures(tab);
     injectControls(tab);
-    buildFooter(tab, inventory, null, "Capacity");
+    buildFooter(tab, inventory, { weightLabel: "Capacity", worth: worthBlock(containerWorth(container)) });
     injectDetailPanel(find, tab, inventory, state);
     observeLayout(tab, inventory, state);
   }
@@ -234,6 +247,42 @@ function annotateItems(find, root) {
     if ( Number.isNumeric(quantity) && (Number(quantity) !== 1) ) el.dataset.wwQty = quantity;
     else delete el.dataset.wwQty;
   }
+}
+
+/* -------------------------------------------- */
+/*  New-item marks                              */
+/* -------------------------------------------- */
+
+let seenItems = null;
+const saveSeenItems = foundry.utils.debounce(() => game.settings.set(MODULE_ID, "seenItems", seenItems), 1000);
+
+/**
+ * Mark items this user hasn't looked at yet; hovering one clears its mark. The first time a user opens an
+ * owner's items, everything already there counts as seen, so only items gained afterwards are marked.
+ * @param {string} ownerKey        The actor (or unowned container) the items belong to.
+ * @param {Collection} ownerItems  All of that owner's items, to forget ids that no longer exist.
+ * @param {HTMLElement} tab
+ */
+function markNewItems(ownerKey, ownerItems, tab) {
+  if ( !ownerKey ) return;
+  seenItems ??= foundry.utils.deepClone(game.settings.get(MODULE_ID, "seenItems") ?? {});
+  const rows = Array.from(tab.querySelectorAll(".items-list li.item[data-item-id]"));
+  if ( !seenItems[ownerKey] ) {
+    seenItems[ownerKey] = ownerItems ? Array.from(ownerItems.keys()) : rows.map(li => li.dataset.itemId);
+    saveSeenItems();
+    return;
+  }
+
+  const seen = new Set(seenItems[ownerKey].filter(id => !ownerItems || ownerItems.has(id)));
+  for ( const li of rows ) toggleData(li, "wwNew", !seen.has(li.dataset.itemId));
+  tab.querySelector(".items-list")?.addEventListener("pointerover", event => {
+    const li = event.target.closest("li.item[data-ww-new]");
+    if ( !li ) return;
+    delete li.dataset.wwNew;
+    seen.add(li.dataset.itemId);
+    seenItems[ownerKey] = Array.from(seen);
+    saveSeenItems();
+  });
 }
 
 /** Features with more uses than this keep dnd5e's number instead of pips. */
@@ -394,18 +443,21 @@ function setCategory(tab, category) {
 }
 
 /**
- * Gather weight, attunement and coins into one bar along the bottom of the tab.
+ * Gather weight, attunement, worth and coins into one bar along the bottom of the tab.
  * @param {HTMLElement} tab
  * @param {HTMLElement} inventory
- * @param {HTMLElement|null} attunement  The attunement block, for characters; null for containers.
- * @param {string} weightLabel           "Carried" for a character, "Capacity" for a container.
+ * @param {object} parts
+ * @param {string} parts.weightLabel            "Carried" for a character, "Capacity" for a container.
+ * @param {HTMLElement|null} [parts.attunement]  The attunement block, for characters.
+ * @param {HTMLElement|null} [parts.worth]       The total worth block.
  */
-function buildFooter(tab, inventory, attunement, weightLabel) {
+function buildFooter(tab, inventory, { weightLabel, attunement=null, worth=null }) {
   if ( tab.querySelector(".ww-footer") ) return;
   const encumbrance = tab.querySelector(".top .encumbrance") ?? inventory.querySelector(".bottom .encumbrance");
   const parts = [
     encumbrance ? carriedBlock(encumbrance, weightLabel) : null,
     attunement,
+    worth,
     inventory.querySelector("section.currency")
   ].filter(Boolean);
   if ( !parts.length ) return;
@@ -433,8 +485,76 @@ function carriedBlock(encumbrance, label) {
       <span class="ww-carried-value"></span>
     </div>`;
   if ( value && max ) block.querySelector(".ww-carried-value").textContent = `${value} / ${max}`;
+
+  // Warn in amber once encumbered, deeper orange when heavily encumbered, red when over the limit.
+  const meter = encumbrance.querySelector(".meter");
+  const share = name => parseFloat(meter?.style.getPropertyValue(name));
+  const filled = share("--bar-percentage");
+  const within = stop => Number.isFinite(stop) && (stop > 0) && (stop < 100);
+  const heavy = share("--breakpoint-high");
+  const encumbered = share("--breakpoint-low");
+  if ( filled >= 100 ) block.dataset.wwLoad = "over";
+  else if ( within(heavy) && (filled >= heavy) ) block.dataset.wwLoad = "heavy";
+  else if ( within(encumbered) && (filled >= encumbered) ) block.dataset.wwLoad = "encumbered";
+
   block.append(encumbrance);
   return block;
+}
+
+/**
+ * "Worth 1,240 gp": what everything adds up to.
+ * @param {number|null} gold  The total in gold pieces.
+ * @returns {HTMLElement|null}
+ */
+function worthBlock(gold) {
+  if ( !Number.isFinite(gold) ) return null;
+  const block = document.createElement("div");
+  block.className = "ww-worth";
+  block.dataset.tooltip = t("WorthHint");
+  const shown = gold >= 10 ? Math.round(gold) : Math.round(gold * 10) / 10;
+  block.innerHTML = `
+    <span class="ww-worth-label">${t("Worth")}</span>
+    <span class="ww-worth-value">${number(shown)} ${esc(currencyAbbreviation("gp"))}</span>`;
+  return block;
+}
+
+/** A character's coins (their own and in their containers) plus the value of everything they carry. */
+function actorWorth(actor) {
+  if ( !actor ) return null;
+  const items = Array.from(actor.items);
+  const containerCoins = items.filter(i => i.type === "container").reduce((sum, c) => sum + coinsWorth(c.system.currency), 0);
+  return coinsWorth(actor.system.currency) + containerCoins + itemsWorth(items);
+}
+
+/** A container's coins plus the value of what's directly inside it. */
+function containerWorth(container) {
+  if ( !container ) return null;
+  const source = container.actor?.items ?? game.items;
+  const contents = Array.from(source ?? []).filter(i => i.system.container === container.id);
+  return coinsWorth(container.system.currency) + itemsWorth(contents);
+}
+
+function coinsWorth(currency) {
+  return Object.entries(currency ?? {}).reduce((sum, [key, amount]) => sum + toGold(Number(amount) || 0, key), 0);
+}
+
+/** Items' prices times their quantities. Unidentified items don't count for players, so their worth isn't given away. */
+function itemsWorth(items) {
+  return items.reduce((sum, item) => {
+    const price = item.system.price;
+    if ( !price?.value || ((item.system.identified === false) && !game.user.isGM) ) return sum;
+    return sum + (toGold(price.value, price.denomination ?? "gp") * (Number(item.system.quantity) || 1));
+  }, 0);
+}
+
+/** Convert an amount of one coin into gold, using dnd5e's own exchange rates. */
+function toGold(amount, denomination) {
+  const conversion = CONFIG.DND5E.currencies?.[denomination]?.conversion;
+  return conversion ? amount / conversion : 0;
+}
+
+function currencyAbbreviation(key) {
+  return loc(CONFIG.DND5E.currencies?.[key], "abbreviation") || key;
 }
 
 /**
@@ -545,7 +665,9 @@ async function showDetail(find, tab, panel, itemId, state) {
  * @returns {Promise<string>}
  */
 function cachedDetailHTML(item, state) {
-  const key = `${item.id}:${item._stats?.modifiedTime ?? ""}`;
+  // The comparison depends on what else is equipped, so equipping something else refreshes the panel too.
+  const equipped = item.actor?.items.filter(i => i.system.equipped).map(i => i.id).join(",") ?? "";
+  const key = `${item.id}:${item._stats?.modifiedTime ?? ""}:${equipped}`;
   let html = state.details.get(key);
   if ( !html ) {
     html = detailHTML(item).catch(error => {
@@ -584,6 +706,7 @@ async function detailHTML(item) {
     ...physicalStats(item), ...stateStats(item, key)
   ];
   const description = await enrich(concealed ? system.unidentified?.description : system.description?.value, item);
+  const compare = concealed ? null : comparison(item);
 
   return `
     <div class="ww-detail-scroll">
@@ -602,6 +725,11 @@ async function detailHTML(item) {
       ${stats.length ? `<dl class="ww-d-stats">${stats.map(([label, value]) => `
         <div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}
       </dl>` : ""}
+      ${compare ? `<div class="ww-d-compare ${compare.better === true ? "better" : compare.better === false ? "worse" : "same"}">
+        <span class="ww-d-compare-label">${esc(game.i18n.format("WITCHWIND.CompareWith", { name: compare.name }))}</span>
+        <span class="ww-d-compare-value">${esc(compare.text)}</span>
+        <span class="ww-d-compare-detail">${esc(compare.detail)}</span>
+      </div>` : ""}
       ${description ? `<div class="ww-d-desc">${description}</div>` : ""}
     </div>`;
 }
@@ -630,6 +758,84 @@ function headlineStat(item, labels) {
   if ( isText(labels.save) ) return { label: t("Save"), value: labels.save };
   if ( isText(labels.activation) && !("quantity" in system) ) return { label: activationLabel(item), value: labels.activation };
   return null;
+}
+
+/**
+ * How an unequipped weapon or armor compares with what's equipped in the same role: the best equipped weapon
+ * of the same attack type (by average damage), or the equipped body armor or shield (by armor class).
+ * @param {Item} item
+ * @returns {{name: string, text: string, detail: string, better: boolean|null}|null}
+ */
+function comparison(item) {
+  const actor = item.actor;
+  if ( !actor || item.system.equipped ) return null;
+  const equipped = actor.items.filter(i => (i.id !== item.id) && (i.type === item.type) && i.system.equipped);
+
+  if ( item.type === "weapon" ) {
+    const mine = averageDamage(item);
+    if ( mine === null ) return null;
+    let best = null;
+    for ( const other of equipped ) {
+      if ( other.system.attackType !== item.system.attackType ) continue;
+      const average = averageDamage(other);
+      if ( (average !== null) && (!best || (average > best.average)) ) best = { other, average };
+    }
+    if ( !best ) return null;
+    const delta = Math.round((mine - best.average) * 10) / 10;
+    return {
+      name: best.other.name,
+      better: delta > 0 ? true : delta < 0 ? false : null,
+      text: delta ? game.i18n.format("WITCHWIND.AvgDamage", { delta: signed(delta) }) : t("NoChange"),
+      detail: `${number(mine)} vs ${number(best.average)}`
+    };
+  }
+
+  if ( (item.type === "equipment") && item.system.armor?.value ) {
+    const isShield = item.system.type?.value === "shield";
+    const other = equipped.find(i => i.system.armor?.value && ((i.system.type?.value === "shield") === isShield));
+    if ( !other ) return null;
+    const dex = actor.system.abilities?.dex?.mod ?? 0;
+    const mine = armorClass(item, dex);
+    const theirs = armorClass(other, dex);
+    const delta = mine - theirs;
+    return {
+      name: other.name,
+      better: delta > 0 ? true : delta < 0 ? false : null,
+      text: delta ? game.i18n.format("WITCHWIND.ArmorDelta", { delta: signed(delta) }) : t("NoChange"),
+      detail: isShield ? `+${mine} vs +${theirs}` : `${mine} vs ${theirs}`
+    };
+  }
+  return null;
+}
+
+/** Average of an item's damage, from the formulas dnd5e has already resolved for it; null when it can't be worked out. */
+function averageDamage(item) {
+  const formulas = (item.labels?.damages ?? []).map(d => d.formula).filter(isText);
+  if ( !formulas.length ) return null;
+  try {
+    const formula = formulas.join(" + ");
+    // Dice sums are symmetric, so the average is midway between the lowest and highest roll.
+    const low = new Roll(formula).evaluateSync({ minimize: true }).total;
+    const high = new Roll(formula).evaluateSync({ maximize: true }).total;
+    return (low + high) / 2;
+  } catch {
+    return null;
+  }
+}
+
+/** The armor class a piece of armor gives this character (with their Dexterity), or a shield's bonus. */
+function armorClass(item, dex) {
+  const armor = item.system.armor;
+  const base = (armor.value ?? 0) + (armor.magicalBonus ?? 0);
+  switch ( item.system.type?.value ) {
+    case "light": return base + dex;
+    case "medium": return base + Math.min(dex, armor.dex ?? 2);
+    default: return base;
+  }
+}
+
+function signed(value) {
+  return `${value > 0 ? "+" : ""}${number(value)}`;
 }
 
 /** Range, or reach for melee weapons. */

@@ -4,7 +4,7 @@
 $root = $PSScriptRoot
 $stage = Join-Path $env:TEMP "witchwind-build"
 $zip = Join-Path $root "dist\witchwind-inventory.zip"
-$include = "module.json", "README.md", "scripts", "styles", "lang"
+$include = "module.json", "README.md", "LICENSE", "scripts", "styles", "lang", "fonts"
 
 if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
 New-Item -ItemType Directory -Force $stage | Out-Null
