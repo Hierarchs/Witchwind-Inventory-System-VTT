@@ -1504,19 +1504,32 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
   color: var(--ww-ink-muted);
 }
 
+/* The level: a compact gold-edged box around the number (or the level dropdown while editing). */
 .dnd5e2.sheet.actor.ww-theme .classes .class .level {
-  background: #0f0d0a !important;
-  border: 1px solid var(--ww-gold-dim) !important;
-  color: var(--ww-gold);
-  font-family: var(--ww-font-display);
-  font-weight: 700;
+  align-self: center;
 }
 
-.dnd5e2.sheet.actor.ww-theme .classes .class .level select {
-  color: var(--ww-gold);
-  font-family: inherit;
-  font-weight: inherit;
-  background: transparent;
+.dnd5e2.sheet.actor.ww-theme .classes .class .level > :is(span, select) {
+  box-sizing: border-box;
+  height: 30px;
+  min-width: 32px;
+  padding: 0 6px;
+  display: inline-grid;
+  place-items: center;
+  background: #0f0d0a !important;
+  border: 1px solid var(--ww-gold-dim) !important;
+  border-radius: 3px;
+  color: var(--ww-gold) !important;
+  font-family: var(--ww-font-display);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: none;
+}
+
+.dnd5e2.sheet.actor.ww-theme .classes .class .level > select {
+  width: auto;
+  text-align: center;
 }
 
 /* -------------------------------------------- */
