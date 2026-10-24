@@ -496,6 +496,18 @@
 
 .dnd5e2.ww-theme .inventory-element .middle {
   align-items: center;
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+/* In a narrow window (a bag) the search box keeps a usable width and the layout controls drop to their own line. */
+.dnd5e2.ww-theme .inventory-element .middle item-list-controls {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.dnd5e2.ww-theme .inventory-element .middle .ww-view-controls {
+  margin-left: auto;
 }
 
 .ww-view-controls {
