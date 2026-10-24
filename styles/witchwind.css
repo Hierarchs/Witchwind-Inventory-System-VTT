@@ -310,7 +310,40 @@
 /*  Details tab                                 */
 /* -------------------------------------------- */
 
-/* Ability scores: the plaque comes from --dnd5e-ability-tab above; the score sits in a gold-edged box beneath. */
+/*
+ * Foundry v14 sorts module stylesheets into its own layers, and in that order dnd5e's theme variables
+ * can still win over ours. The badge picture, frame color and empty-slot outlines are therefore set
+ * directly on the elements, marked important so the layer order can't undo them.
+ */
+.dnd5e2.sheet.actor.ww-theme .ability-scores .ability-score::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M7 1.5H57L62.5 7V50L57 55.5H7L1.5 50V7Z' fill='%231c1813' stroke='%238f7442' stroke-width='1.5'/%3E%3Cpath d='M8.5 4.5H55.5L59.5 8.5V48.5L55.5 52.5H8.5L4.5 48.5V8.5Z' fill='none' stroke='%233d3326'/%3E%3C/svg%3E") !important;
+}
+
+/* filigree-box draws its frame inside its own shadow DOM, so the colors can only reach it as variables on the element. */
+.dnd5e2.sheet.actor.ww-theme filigree-box {
+  --filigree-border-color: var(--ww-gold-dim) !important;
+  --filigree-background-color: var(--ww-panel) !important;
+  --filigree-drop-shadow: drop-shadow(0 0 10px rgb(0 0 0 / 55%)) !important;
+}
+
+.dnd5e2.sheet.actor.ww-theme .pill-lg.empty {
+  border: 1px dashed var(--ww-line-strong) !important;
+  color: var(--ww-ink-muted) !important;
+  background: transparent !important;
+  opacity: 1;
+}
+
+.dnd5e2.sheet.actor.ww-theme .pill-lg.empty:hover {
+  border-color: var(--ww-gold-dim) !important;
+  color: var(--ww-ink) !important;
+}
+
+.dnd5e2.sheet.actor.ww-theme .favorites li.drop {
+  border-color: var(--ww-line-strong) !important;
+  color: var(--ww-ink-faint) !important;
+}
+
+/* Ability scores: the score sits in a gold-edged box beneath the plaque. */
 .dnd5e2.sheet.actor.ww-theme .ability-scores .ability-score .score {
   box-sizing: border-box;
   background: #0f0d0a;
