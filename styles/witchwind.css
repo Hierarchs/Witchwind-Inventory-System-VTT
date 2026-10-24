@@ -1439,6 +1439,16 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
   color: var(--ww-ink-muted);
 }
 
+/* No "–" placeholders where a feature has no uses or recovery; the empty column reads cleaner. */
+.dnd5e2.ww-theme .tab[data-tab="features"] .items-list .item-detail.empty::after {
+  content: none !important;
+}
+
+/* Every row the same height, with or without a subtitle under the name. */
+.dnd5e2.ww-theme .tab[data-tab="features"] .items-list .item .item-row {
+  min-height: 42px;
+}
+
 /* Uses as pips: dnd5e's number field stays in place (hidden) and does the saving. */
 .dnd5e2.ww-theme .items-list .item-uses.ww-has-pips > :not(.ww-uses-pips) {
   display: none;

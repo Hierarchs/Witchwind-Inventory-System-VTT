@@ -199,6 +199,7 @@ function decorateUses(actor, tab) {
     pips.className = "ww-uses-pips";
     pips.setAttribute("role", "group");
     pips.setAttribute("aria-label", `${t("Uses")}: ${value} / ${max}`);
+    pips.dataset.tooltip = usesText(item);
     for ( let n = 1; n <= max; n++ ) {
       // Without an editable field (a locked sheet) the pips only display.
       const pip = document.createElement(input ? "button" : "span");
@@ -458,7 +459,8 @@ async function showDetail(app, tab, panel, itemId, state) {
     actions.append(button);
   };
 
-  addAction(t("Use"), true, event => item.use({ event }));
+  // Something with nothing to activate (a passive feature, plain loot) just posts its card to chat.
+  addAction(t(item.system.activities?.size ? "Use" : "ToChat"), true, event => item.use({ event }));
   if ( "equipped" in item.system ) {
     addAction(t(item.system.equipped ? "Unequip" : "Equip"), false,
       () => item.update({ "system.equipped": !item.system.equipped }), !item.isOwner);
@@ -504,9 +506,11 @@ async function detailHTML(item) {
   const rarity = rarityOf(item);
 
   const name = concealed ? (system.unidentified?.name || item.name) : item.name;
+  // Rarity, type, and where a feature comes from ("Feature · Fighter 1").
   const subtitle = [
     rarity === "mundane" ? "" : loc(CONFIG.DND5E.itemRarity?.[rarity]),
-    system.type?.label || loc(CONFIG.Item.typeLabels?.[item.type])
+    system.type?.label || loc(CONFIG.Item.typeLabels?.[item.type]),
+    (!concealed && isText(system.requirements)) ? system.requirements : ""
   ].filter(Boolean).join(" · ");
   const key = concealed ? null : headlineStat(item, labels);
   const stats = concealed ? physicalStats(item) : [
@@ -538,11 +542,15 @@ async function detailHTML(item) {
 /** The one number that matters most for an item: damage, armor class, a tool's check, or uses left. */
 function headlineStat(item, labels) {
   const system = item.system;
-  const damage = (labels.damages ?? []).map(d => {
+  const damages = labels.damages ?? [];
+  const damage = damages.map(d => {
     const type = loc(CONFIG.DND5E.damageTypes?.[d.damageType]) || loc(CONFIG.DND5E.healingTypes?.[d.damageType]);
     return [d.formula, type?.toLowerCase()].filter(Boolean).join(" ");
   }).filter(Boolean);
-  if ( damage.length ) return { label: t(item.type === "weapon" ? "Damage" : "Effect"), value: damage.join(", ") };
+  if ( damage.length ) {
+    const heals = damages.every(d => d.damageType in (CONFIG.DND5E.healingTypes ?? {}));
+    return { label: t(item.type === "weapon" ? "Damage" : heals ? "Healing" : "Effect"), value: damage.join(", ") };
+  }
   if ( (item.type === "weapon") && labels.damage ) {
     return { label: t("Damage"), value: [labels.damage, labels.damageTypes?.toLowerCase()].filter(Boolean).join(" ") };
   }
@@ -565,14 +573,13 @@ function isText(value) {
   return (typeof value === "string") && (value.trim() !== "");
 }
 
-/** How a feature is used: activation, target, duration and prerequisites. Gear skips these. */
+/** How a feature is used: activation, target and duration. Gear skips these; prerequisites are in the subtitle. */
 function actionStats(item, labels, key) {
   if ( "quantity" in item.system ) return [];
   const stats = [];
   if ( isText(labels.activation) && (key?.label !== t("Activation")) ) stats.push([t("Activation"), labels.activation]);
   if ( isText(labels.target) ) stats.push([t("Target"), labels.target]);
   if ( isText(labels.duration) ) stats.push([t("Duration"), labels.duration]);
-  if ( isText(item.system.requirements) ) stats.push([t("Requirements"), item.system.requirements]);
   return stats;
 }
 
@@ -965,7 +972,11 @@ function watchTooltips() {
   if ( !tooltip ) return;
   new MutationObserver(() => {
     if ( !tooltip.classList.contains("active") ) return;
-    if ( game.tooltip.element?.closest?.(".ww-theme .tab.ww-docked .items-list") ) game.tooltip.deactivate();
+    // Only item cards; small hints in the list (such as the uses pips) still show.
+    const source = game.tooltip.element;
+    if ( source?.closest?.(".ww-theme .tab.ww-docked .items-list") && source.closest(".item-tooltip, [data-ww-tooltips]") ) {
+      game.tooltip.deactivate();
+    }
   }).observe(tooltip, { attributeFilter: ["class"] });
 }
 

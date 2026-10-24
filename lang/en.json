@@ -29,6 +29,8 @@
     "Details": "Item details",
     "NoItem": "Hover over an item to see its details.",
     "Use": "Use",
+    "ToChat": "To Chat",
+    "Healing": "Healing",
     "Equip": "Equip",
     "Unequip": "Unequip",
     "Attune": "Attune",
@@ -53,7 +55,6 @@
     "Activation": "Activation",
     "Target": "Target",
     "Duration": "Duration",
-    "Requirements": "Requirements",
     "Recharge": "Recharge",
     "Equipped": "Equipped"
   }
