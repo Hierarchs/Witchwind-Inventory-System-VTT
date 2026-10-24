@@ -404,7 +404,7 @@
 /*  Inventory tab                               */
 /* -------------------------------------------- */
 
-.dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="features"]) {
+.dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="features"], [data-tab="spells"]) {
   padding: 12px;
   color: var(--ww-ink);
   background: var(--ww-ground);
@@ -413,7 +413,7 @@
   box-shadow: inset 0 0 32px rgb(0 0 0 / 55%);
 }
 
-.dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="features"]) :is(.card, .items-section) {
+.dnd5e2.ww-theme .tab:is([data-tab="inventory"], [data-tab="features"], [data-tab="spells"]) :is(.card, .items-section) {
   background: var(--ww-panel);
   border: 1px solid var(--ww-line);
   box-shadow: none;
@@ -1268,7 +1268,7 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
 }
 
 .dnd5e2.ww-theme:not(.ww-grid) .tab.ww-docked .items-list .item[data-ww-selected],
-.dnd5e2.ww-theme .tab[data-tab="features"].ww-docked .items-list .item[data-ww-selected] {
+.dnd5e2.ww-theme .tab:is([data-tab="features"], [data-tab="spells"]).ww-docked .items-list .item[data-ww-selected] {
   background: rgb(201 164 92 / 10%);
 }
 
@@ -1426,27 +1426,58 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
 }
 
 /* -------------------------------------------- */
-/*  Features tab                                */
+/*  Features and Spells tabs                    */
 /* -------------------------------------------- */
 
-/* Feature icons get a thin gold frame. */
-.dnd5e2.ww-theme .tab[data-tab="features"] .items-section .item .item-image {
+/* Feature and spell icons get a thin gold frame. */
+.dnd5e2.ww-theme .tab:is([data-tab="features"], [data-tab="spells"]) .items-section .item .item-image {
   border-color: var(--ww-gold-dim);
 }
 
-.dnd5e2.ww-theme .tab[data-tab="features"] .item-recovery .condensed {
+.dnd5e2.ww-theme .tab:is([data-tab="features"], [data-tab="spells"]) .item-recovery .condensed {
   font-size: 12px;
   color: var(--ww-ink-muted);
 }
 
-/* No "–" placeholders where a feature has no uses or recovery; the empty column reads cleaner. */
-.dnd5e2.ww-theme .tab[data-tab="features"] .items-list .item-detail.empty::after {
+/* No "–" placeholders in empty columns; the blank reads cleaner. */
+.dnd5e2.ww-theme .tab:is([data-tab="features"], [data-tab="spells"]) .items-list .item-detail.empty::after {
   content: none !important;
 }
 
 /* Every row the same height, with or without a subtitle under the name. */
-.dnd5e2.ww-theme .tab[data-tab="features"] .items-list .item .item-row {
+.dnd5e2.ww-theme .tab:is([data-tab="features"], [data-tab="spells"]) .items-list .item .item-row {
   min-height: 42px;
+}
+
+/* Spellcasting cards: ability, attack, save DC and prepared count as gold figures under small labels. */
+.dnd5e2.sheet.actor.ww-theme .tab[data-tab="spells"] .spellcasting.card .info .label {
+  font-family: var(--ww-font-ui);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ww-ink-muted);
+}
+
+.dnd5e2.sheet.actor.ww-theme .tab[data-tab="spells"] .spellcasting.card .info .value {
+  font-family: var(--ww-font-display);
+  font-weight: 700;
+  color: var(--ww-gold);
+}
+
+.dnd5e2.sheet.actor.ww-theme .tab[data-tab="spells"] .spellcasting.card.primary {
+  border-color: var(--ww-gold-dim);
+}
+
+/* Spell slot pips on each level's header: gold when available, dark and outlined when spent. */
+/* dnd5e sets these on the pips themselves, so ours are marked important (see the Details tab note). */
+.dnd5e2.sheet.actor.ww-theme .spells-list .items-section .pips .pip {
+  --icon-fill: #0f0d0a !important;
+  --icon-stroke: var(--ww-gold-dim) !important;
+}
+
+.dnd5e2.sheet.actor.ww-theme .spells-list .items-section .pips .pip.filled {
+  --icon-fill: var(--ww-gold) !important;
+  --icon-stroke: var(--ww-gold) !important;
 }
 
 /* Uses as pips: dnd5e's number field stays in place (hidden) and does the saving. */

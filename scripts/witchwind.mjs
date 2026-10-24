@@ -117,15 +117,16 @@ function onRenderActorSheet(app, element) {
     observeLayout(tab, inventory, state);
   }
 
-  // Features stay a list, with uses as pips and the same docked detail panel.
-  const featuresTab = element.querySelector('.tab[data-tab="features"]');
-  const features = featuresTab?.querySelector(".inventory-element");
-  if ( features ) {
-    const state = tabState(app, "features");
-    annotateItems(app.actor, featuresTab);
-    decorateUses(app.actor, featuresTab);
-    injectDetailPanel(app, featuresTab, features, state);
-    observeLayout(featuresTab, features, state);
+  // Features and Spells stay lists, with uses as pips and the same docked detail panel.
+  for ( const id of ["features", "spells"] ) {
+    const listTab = element.querySelector(`.tab[data-tab="${id}"]`);
+    const list = listTab?.querySelector(".inventory-element");
+    if ( !list ) continue;
+    const state = tabState(app, id);
+    annotateItems(app.actor, listTab);
+    decorateUses(app.actor, listTab);
+    injectDetailPanel(app, listTab, list, state);
+    observeLayout(listTab, list, state);
   }
 
   applySheetState(element);
@@ -460,7 +461,8 @@ async function showDetail(app, tab, panel, itemId, state) {
   };
 
   // Something with nothing to activate (a passive feature, plain loot) just posts its card to chat.
-  addAction(t(item.system.activities?.size ? "Use" : "ToChat"), true, event => item.use({ event }));
+  const useLabel = !item.system.activities?.size ? "ToChat" : (item.type === "spell") ? "Cast" : "Use";
+  addAction(t(useLabel), true, event => item.use({ event }));
   if ( "equipped" in item.system ) {
     addAction(t(item.system.equipped ? "Unequip" : "Equip"), false,
       () => item.update({ "system.equipped": !item.system.equipped }), !item.isOwner);
@@ -506,15 +508,17 @@ async function detailHTML(item) {
   const rarity = rarityOf(item);
 
   const name = concealed ? (system.unidentified?.name || item.name) : item.name;
-  // Rarity, type, and where a feature comes from ("Feature · Fighter 1").
-  const subtitle = [
+  // Spells: level and school ("1st Level · Evocation"). Everything else: rarity, type, and where a
+  // feature comes from ("Feature · Fighter 1").
+  const subtitle = (item.type === "spell") ? [labels.level, labels.school].filter(isText).join(" · ") : [
     rarity === "mundane" ? "" : loc(CONFIG.DND5E.itemRarity?.[rarity]),
     system.type?.label || loc(CONFIG.Item.typeLabels?.[item.type]),
     (!concealed && isText(system.requirements)) ? system.requirements : ""
   ].filter(Boolean).join(" · ");
   const key = concealed ? null : headlineStat(item, labels);
   const stats = concealed ? physicalStats(item) : [
-    ...actionStats(item, labels, key), ...combatStats(item, labels), ...physicalStats(item), ...stateStats(item, key)
+    ...actionStats(item, labels, key), ...spellStats(item, labels), ...combatStats(item, labels),
+    ...physicalStats(item), ...stateStats(item, key)
   ];
   const description = await enrich(concealed ? system.unidentified?.description : system.description?.value, item);
 
@@ -549,7 +553,8 @@ function headlineStat(item, labels) {
   }).filter(Boolean);
   if ( damage.length ) {
     const heals = damages.every(d => d.damageType in (CONFIG.DND5E.healingTypes ?? {}));
-    return { label: t(item.type === "weapon" ? "Damage" : heals ? "Healing" : "Effect"), value: damage.join(", ") };
+    const label = heals ? "Healing" : ["weapon", "spell"].includes(item.type) ? "Damage" : "Effect";
+    return { label: t(label), value: damage.join(", ") };
   }
   if ( (item.type === "weapon") && labels.damage ) {
     return { label: t("Damage"), value: [labels.damage, labels.damageTypes?.toLowerCase()].filter(Boolean).join(" ") };
@@ -559,8 +564,33 @@ function headlineStat(item, labels) {
     return { label: t("Check"), value: loc(CONFIG.DND5E.abilities?.[system.ability]) };
   }
   if ( system.uses?.max ) return { label: t("Uses"), value: usesText(item) };
-  if ( isText(labels.activation) && !("quantity" in system) ) return { label: t("Activation"), value: labels.activation };
+  if ( isText(labels.save) ) return { label: t("Save"), value: labels.save };
+  if ( isText(labels.activation) && !("quantity" in system) ) return { label: activationLabel(item), value: labels.activation };
   return null;
+}
+
+/** Range, or reach for melee weapons. */
+function rangeStats(item, labels) {
+  const range = item.system.range;
+  if ( isText(labels.range) ) return [[t("Range"), labels.range]];
+  if ( range?.reach ) return [[t("Reach"), `${number(range.reach)} ${range.units ?? ""}`.trim()]];
+  return [];
+}
+
+/** Spells are cast; features are activated. */
+function activationLabel(item) {
+  return t(item.type === "spell" ? "CastingTime" : "Activation");
+}
+
+/** Components (with materials), concentration and ritual tags, and the save a spell calls for. */
+function spellStats(item, labels) {
+  if ( item.type !== "spell" ) return [];
+  const stats = [];
+  const components = labels.components;
+  const parts = isText(components?.full) ? components.full : components?.vsm;
+  if ( isText(parts) ) stats.push([t("Components"), parts]);
+  if ( components?.tags?.length ) stats.push([t("Tags"), components.tags.join(", ")]);
+  return stats;
 }
 
 /** "2 / 3 · Long Rest": uses left and how they come back. */
@@ -577,9 +607,12 @@ function isText(value) {
 function actionStats(item, labels, key) {
   if ( "quantity" in item.system ) return [];
   const stats = [];
-  if ( isText(labels.activation) && (key?.label !== t("Activation")) ) stats.push([t("Activation"), labels.activation]);
+  const activation = activationLabel(item);
+  if ( isText(labels.activation) && (key?.label !== activation) ) stats.push([activation, labels.activation]);
+  stats.push(...rangeStats(item, labels));
   if ( isText(labels.target) ) stats.push([t("Target"), labels.target]);
   if ( isText(labels.duration) ) stats.push([t("Duration"), labels.duration]);
+  if ( isText(labels.save) && (key?.label !== t("Save")) ) stats.push([t("Save"), labels.save]);
   return stats;
 }
 
@@ -598,9 +631,10 @@ function combatStats(item, labels) {
   const system = item.system;
   const stats = [];
   if ( labels.toHit ) stats.push([t("ToHit"), labels.toHit]);
-  if ( labels.range ) stats.push([t("Range"), labels.range]);
-  else if ( system.range?.reach ) stats.push([t("Reach"), `${number(system.range.reach)} ${system.range.units ?? ""}`.trim()]);
-  const properties = (labels.properties ?? []).map(p => p.label).filter(Boolean);
+  // Spells and features list range with their casting details instead (see actionStats).
+  if ( "quantity" in system ) stats.push(...rangeStats(item, labels));
+  // A spell's properties are its components and tags, already listed by spellStats.
+  const properties = (item.type === "spell") ? [] : (labels.properties ?? []).map(p => p.label).filter(Boolean);
   if ( properties.length ) stats.push([t("Properties"), properties.join(", ")]);
   const mastery = loc(CONFIG.DND5E.weaponMasteries?.[system.mastery]);
   if ( mastery ) stats.push([t("Mastery"), mastery]);
