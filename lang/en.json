@@ -5,10 +5,6 @@
         "Name": "Restyle sheets",
         "Hint": "Show dnd5e character, NPC, item and container sheets in the Witchwind style. This only changes your own view."
       },
-      "ChatStyle": {
-        "Name": "Chat card style",
-        "Hint": "How roll, attack and item cards look in chat. This only changes your own view."
-      },
       "SlotSize": {
         "Name": "Slot size",
         "Hint": "Size of each inventory slot in grid view, in pixels. You can also change it with the slider on the inventory tab."

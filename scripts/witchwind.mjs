@@ -74,20 +74,6 @@ Hooks.once("init", () => {
     onChange: applyTooltipStyle
   });
 
-  register("chatStyle", {
-    name: "WITCHWIND.Settings.ChatStyle.Name",
-    hint: "WITCHWIND.Settings.ChatStyle.Hint",
-    config: true,
-    type: String,
-    choices: {
-      parchment: "WITCHWIND.Settings.TooltipStyle.Choices.parchment",
-      steel: "WITCHWIND.Settings.TooltipStyle.Choices.steel",
-      system: "WITCHWIND.Settings.TooltipStyle.Choices.system"
-    },
-    default: "parchment",
-    onChange: applyChatStyle
-  });
-
   // Grid or list, switched from the inventory tab itself.
   register("view", {
     config: false,
@@ -106,7 +92,6 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   applyTooltipStyle();
-  applyChatStyle();
   watchTooltips();
 });
 Hooks.on("renderCharacterActorSheet", onRenderActorSheet);
@@ -1282,12 +1267,6 @@ function watchTooltips() {
       game.tooltip.deactivate();
     }
   }).observe(tooltip, { attributeFilter: ["class"] });
-}
-
-function applyChatStyle() {
-  const style = game.settings.get(MODULE_ID, "chatStyle");
-  document.body.classList.toggle("ww-chat-parchment", style === "parchment");
-  document.body.classList.toggle("ww-chat-steel", style === "steel");
 }
 
 function applyTooltipStyle() {
