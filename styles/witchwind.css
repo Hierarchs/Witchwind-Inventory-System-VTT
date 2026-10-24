@@ -338,9 +338,28 @@
   color: var(--ww-ink) !important;
 }
 
+/* dnd5e fades the favorites drop zone to a quarter opacity; show it like the other empty slots. */
 .dnd5e2.sheet.actor.ww-theme .favorites li.drop {
-  border-color: var(--ww-line-strong) !important;
-  color: var(--ww-ink-faint) !important;
+  opacity: 1 !important;
+  background: rgb(0 0 0 / 15%);
+  border: 1px dashed var(--ww-line-strong) !important;
+  color: var(--ww-ink-muted) !important;
+}
+
+/* Initiative, Speed and Proficiency: a leather lozenge with a double rule in place of dnd5e's tan one. */
+.dnd5e2.sheet.actor.ww-theme .sidebar .lozenges .lozenge {
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 68 30'%3E%3Cpath d='M10 1H58L67 15L58 29H10L1 15Z' fill='%231c1813' stroke='%238f7442' stroke-width='1.5'/%3E%3Cpath d='M12 4H56L63.5 15L56 26H12L4.5 15Z' fill='none' stroke='%233d3326'/%3E%3C/svg%3E") no-repeat top center / 68px 30px !important;
+}
+
+.dnd5e2.sheet.actor.ww-theme .sidebar .lozenges .lozenge .value {
+  color: #efe3c8;
+  font-family: var(--ww-font-ui);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 80%);
+}
+
+.dnd5e2.sheet.actor.ww-theme .sidebar .lozenges .lozenge .label {
+  color: var(--ww-gold);
+  letter-spacing: 0.04em;
 }
 
 /* Ability scores: the score sits in a gold-edged box beneath the plaque. */
