@@ -2,7 +2,7 @@
   "id": "witchwind-inventory",
   "title": "Witchwind Inventory",
   "description": "A restyle of the dnd5e character inventory inspired by The Witcher 3 and Morrowind: a slot grid with rarity frames, a resizable layout and parchment item cards.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "authors": [
     { "name": "Hierarchs", "url": "https://github.com/Hierarchs" }
   ],

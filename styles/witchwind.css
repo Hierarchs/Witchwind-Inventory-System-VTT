@@ -55,6 +55,8 @@
   --dnd5e-shadow-45: rgb(0 0 0 / 45%);
   --dnd5e-font-roboto: var(--ww-font-ui);
   --dnd5e-font-roboto-condensed: var(--ww-font-display);
+  --dnd5e-card-header-1: var(--ww-raised);
+  --dnd5e-card-header-2: var(--ww-panel);
 
   padding: 12px;
   color: var(--ww-ink);
@@ -76,6 +78,18 @@
   font-weight: 700;
   letter-spacing: 0.05em;
   color: var(--ww-ink-muted);
+}
+
+/* Section headers. Sheet themes can recolor these, so the theme here has to win. */
+.dnd5e2.ww-inventory .tab[data-tab="inventory"] .items-header {
+  background: var(--ww-raised) !important;
+  color: var(--ww-ink-muted) !important;
+  border-bottom: 1px solid var(--ww-line);
+}
+
+.dnd5e2.ww-inventory .tab[data-tab="inventory"] .items-header :is(h3, .item-name, .item-header) {
+  color: var(--ww-ink-muted) !important;
+  text-shadow: none !important;
 }
 
 .dnd5e2.ww-inventory .tab[data-tab="inventory"] input:is([type="text"], [type="search"], [type="number"]),
@@ -159,10 +173,43 @@
 .ww-slot-size .ww-icon-small { font-size: 9px; }
 .ww-slot-size .ww-icon-large { font-size: 15px; }
 
-.ww-slot-size input[type="range"] {
+.ww-view-controls .ww-slot-size input[type="range"] {
   width: 80px;
+  height: 4px;
   margin: 0;
-  accent-color: var(--ww-gold);
+  padding: 0;
+  appearance: none;
+  background: var(--ww-line);
+  border: none;
+  border-radius: 2px;
+  box-shadow: none;
+}
+
+.ww-view-controls .ww-slot-size input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--ww-gold);
+  border: 2px solid var(--ww-ground);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--ww-gold-dim);
+  cursor: pointer;
+}
+
+.ww-view-controls .ww-slot-size input[type="range"]::-moz-range-thumb {
+  width: 8px;
+  height: 8px;
+  background: var(--ww-gold);
+  border: 2px solid var(--ww-ground);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--ww-gold-dim);
+  cursor: pointer;
+}
+
+.ww-view-controls .ww-slot-size input[type="range"]::-moz-range-track {
+  height: 4px;
+  background: var(--ww-line);
+  border-radius: 2px;
 }
 
 .ww-view-toggle {
@@ -205,7 +252,9 @@
 /* Flatten dnd5e's sections into one grid so every item becomes a slot. */
 .dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, var(--ww-slot, 56px));
+  /* Tracks stretch to fill the row so the section dividers reach the right edge; slots stay square inside them. */
+  grid-template-columns: repeat(auto-fill, minmax(var(--ww-slot, 56px), 1fr));
+  justify-items: center;
   align-content: start;
   gap: 8px;
   padding: 12px;
@@ -227,13 +276,15 @@
 /* Section names become dividers across the grid. */
 .dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-header {
   grid-column: 1 / -1;
+  justify-self: stretch;
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 0;
   padding: 6px 0 0;
-  background: none;
-  border: none;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-section:first-child .items-header {
@@ -279,6 +330,18 @@
   height: 100%;
 }
 
+/* Sheet themes can add accent bars or backgrounds to rows; a slot doesn't want them. */
+.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item :is(.item-row, .item-name) {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item :is(.item-row, .item-name)::before,
+.dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name::after {
+  display: none !important;
+}
+
 .dnd5e2.ww-inventory.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name {
   width: 100%;
   height: 100%;
@@ -300,9 +363,9 @@
   height: calc(var(--ww-slot, 56px) - 10px);
   min-width: 0;
   min-height: 0;
-  border: none;
+  border: none !important;
   border-radius: 2px;
-  box-shadow: none;
+  box-shadow: none !important;
 }
 
 /* Equipped: gold diamond, top left */
