@@ -1012,6 +1012,8 @@
   grid-template-rows: auto auto 1fr;
   column-gap: 16px;
   row-gap: 8px;
+  /* A short list (two features, say) still leaves the panel room to show an item. */
+  min-height: 460px;
 }
 
 .dnd5e2.ww-theme .tab.ww-docked .inventory-element > * { grid-column: 1; }
@@ -1063,6 +1065,11 @@ body.ww-tooltip-steel .dnd5e2.ww-theme .tab.ww-docked .inventory-element > .ww-d
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* Long content scrolls; nothing in the panel gets squashed to fit. */
+.ww-detail .ww-detail-scroll > * {
+  flex-shrink: 0;
 }
 
 .ww-detail .ww-detail-empty {
