@@ -4,7 +4,9 @@ A restyle of dnd5e character and NPC sheets, inspired by The Witcher 3 and Morro
 
 - **Whole sheet.** Dark leather and gold replace dnd5e's banner art and blue-grey theme: a leather header with a double gold rule, Cinzel headings, and brown panels on every tab and the sidebar. Works whether Foundry is set to light or dark.
 - **Slot grid.** Items become square slots on dark leather, framed by rarity (uncommon green, rare blue, very rare purple, legendary orange, artifact red). A gold diamond marks equipped items, a violet star marks attuned ones, and stack sizes sit in the corner.
-- **Category tabs.** All, Weapons, Equipment, Consumables, Tools and Loot filter the grid. Empty slots pad it out, and pictures are cropped to fill their slots.
+- **Category tabs.** All, Weapons, Equipment, Consumables, Tools and Loot filter the grid. Empty slots pad it out to the bottom of the sheet.
+- **Pictures fill their slots.** Each picture is measured once: art on its own background is zoomed to fill the slot, and cut-out objects are shown whole at the largest size that fits, ignoring any transparent margins.
+- **Legendary and artifact glow.** Their slots carry a slowly breathing orange or red halo. Animations are short and switch off if your system asks for reduced motion.
 - **Detail panel.** When the sheet is wide enough, a parchment panel beside the grid shows the item you're hovering, with Use, Equip and Attune buttons. On narrower sheets the hover card does the same job.
 - **Footer.** Carried weight, attunement and coins sit in one bar along the bottom.
 - **Resizable.** A slider on the inventory tab sets the slot size (44 to 80 px). Each player's choice is saved on their own device.

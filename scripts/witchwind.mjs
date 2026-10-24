@@ -18,8 +18,18 @@ const CATEGORIES = [
   { id: "loot", icon: "fa-gem" }
 ];
 
-/** Per-sheet UI state that should survive re-renders: chosen category, selected item, observers. */
+/** Per-sheet UI state that should survive re-renders: chosen category, selected item, observers, cached panels. */
 const sheetStates = new WeakMap();
+
+/* Picture fitting: pictures are sampled at this size, pixels below this alpha count as empty, and a
+   content box at least this full counts as a filled rectangle rather than a cut-out object. */
+const PICTURE_SAMPLE = 96;
+const PICTURE_ALPHA = 24;
+const PICTURE_FILLED = 0.85;
+const PICTURE_PADDING = 0.06;
+
+/** Measured picture content by image URL, shared by every sheet: a fit, null when unreadable, or a pending promise. */
+const pictureFits = new Map();
 
 /* -------------------------------------------- */
 /*  Settings                                    */
@@ -76,6 +86,8 @@ Hooks.once("ready", () => {
 });
 Hooks.on("renderCharacterActorSheet", onRenderActorSheet);
 Hooks.on("renderNPCActorSheet", onRenderActorSheet);
+Hooks.on("closeCharacterActorSheet", onCloseActorSheet);
+Hooks.on("closeNPCActorSheet", onCloseActorSheet);
 
 /* -------------------------------------------- */
 /*  Rendering                                   */
@@ -97,15 +109,27 @@ function onRenderActorSheet(app, element) {
   if ( !inventory ) return;
 
   let state = sheetStates.get(app);
-  if ( !state ) sheetStates.set(app, state = { category: "all", selected: null, observers: [] });
+  if ( !state ) sheetStates.set(app, state = { category: "all", selected: null, observers: [], details: new Map() });
 
   annotateItems(app.actor, tab);
+  fitPictures(tab);
   injectControls(tab);
   injectCategories(tab, inventory, state);
   buildFooter(app.actor, tab, inventory);
   injectDetailPanel(app, tab, inventory, state);
   applySheetState(element);
   observeLayout(tab, inventory, state);
+}
+
+/**
+ * Stop watching a sheet's layout once it closes.
+ * @param {ApplicationV2} app
+ */
+function onCloseActorSheet(app) {
+  const state = sheetStates.get(app);
+  if ( !state ) return;
+  for ( const observer of state.observers ) observer.disconnect();
+  state.observers = [];
 }
 
 /**
@@ -165,7 +189,7 @@ function injectControls(tab) {
   range.addEventListener("input", event => {
     event.stopPropagation();
     setSlotSize(tab.closest(".ww-sheet"), event.target.value);
-    fillSlots(tab);
+    scheduleFill(tab);
   });
   range.addEventListener("change", event => {
     event.stopPropagation();
@@ -204,9 +228,11 @@ function injectCategories(tab, inventory, state) {
     button.innerHTML = `<i class="fa-solid ${icon}" inert></i><span>${id === "all" ? t("CategoryAll") : typeLabel(id)}</span>`;
     button.addEventListener("click", event => {
       event.stopPropagation();
+      if ( state.category === id ) return;
       state.category = id;
       setCategory(tab, id);
-      fillSlots(tab);
+      replayAnimation(tab, state);
+      scheduleFill(tab);
     });
     nav.append(button);
   }
@@ -215,6 +241,18 @@ function injectCategories(tab, inventory, state) {
   // A category emptied since the last render falls back to showing everything.
   if ( (state.category !== "all") && !counts[state.category] ) state.category = "all";
   setCategory(tab, state.category);
+}
+
+/**
+ * Let the slots shown by a category change settle in with a short animation. It's tied to this class
+ * rather than always on, so ordinary re-renders (equipping, using an item) don't make the grid flicker.
+ */
+function replayAnimation(tab, state) {
+  tab.classList.remove("ww-animate");
+  void tab.offsetWidth; // Restart the animation even when switching again mid-way.
+  tab.classList.add("ww-animate");
+  clearTimeout(state.animationTimer);
+  state.animationTimer = setTimeout(() => tab.classList.remove("ww-animate"), 400);
 }
 
 function setCategory(tab, category) {
@@ -329,11 +367,12 @@ async function showDetail(app, tab, panel, itemId, state) {
 
   // Hovering quickly across slots starts several loads; only the latest one gets to draw.
   const request = state.detailRequest = (state.detailRequest ?? 0) + 1;
-  const html = await detailHTML(item);
+  const html = await cachedDetailHTML(item, state);
   if ( (request !== state.detailRequest) || !panel.isConnected ) return;
 
   panel.dataset.wwRarity = rarityOf(item);
   panel.innerHTML = html;
+  fitPicture(panel.querySelector(".ww-d-pic img"));
 
   const actions = document.createElement("div");
   actions.className = "ww-detail-actions";
@@ -360,6 +399,28 @@ async function showDetail(app, tab, panel, itemId, state) {
       () => item.update({ "system.attuned": !item.system.attuned }), !item.isOwner);
   }
   panel.append(actions);
+}
+
+/**
+ * The panel contents for an item, reused while the item is unchanged so hovering back and forth
+ * doesn't re-enrich its description every time.
+ * @param {Item} item
+ * @param {object} state
+ * @returns {Promise<string>}
+ */
+function cachedDetailHTML(item, state) {
+  const key = `${item.id}:${item._stats?.modifiedTime ?? ""}`;
+  let html = state.details.get(key);
+  if ( !html ) {
+    html = detailHTML(item).catch(error => {
+      console.error(`${MODULE_ID} | Couldn't build details for ${item.name}`, error);
+      state.details.delete(key);
+      return `<div class="ww-detail-scroll"><h3 class="ww-d-name">${esc(item.name)}</h3></div>`;
+    });
+    state.details.set(key, html);
+    if ( state.details.size > 60 ) state.details.delete(state.details.keys().next().value);
+  }
+  return html;
 }
 
 /**
@@ -390,7 +451,7 @@ async function detailHTML(item) {
       </header>
       <div class="ww-d-rule" aria-hidden="true"><span></span></div>
       <div class="ww-d-key">
-        <img src="${esc(item.img)}" alt="">
+        <span class="ww-d-pic"><img src="${esc(item.img)}" alt=""></span>
         ${key ? `<div class="ww-d-key-text">
           <span class="ww-d-key-label">${esc(key.label)}</span>
           <span class="ww-d-key-value">${esc(key.value)}</span>
@@ -516,7 +577,7 @@ function observeLayout(tab, inventory, state) {
   const scroller = scrollParent(tab);
   if ( scroller ) resize.observe(scroller);
   // dnd5e's search and filters show and hide rows with the hidden attribute.
-  const filter = new MutationObserver(() => fillSlots(tab));
+  const filter = new MutationObserver(() => scheduleFill(tab));
   filter.observe(list, { attributes: true, attributeFilter: ["hidden"], subtree: true });
   state.observers = [resize, filter];
   update();
@@ -568,6 +629,119 @@ function fillSlots(tab) {
   }));
 }
 
+/** Ask for a fillSlots pass on the next frame, folding repeated requests from one burst of changes into one. */
+const pendingFills = new Set();
+function scheduleFill(tab) {
+  if ( !tab || pendingFills.has(tab) ) return;
+  pendingFills.add(tab);
+  requestAnimationFrame(() => {
+    pendingFills.delete(tab);
+    fillSlots(tab);
+  });
+}
+
+/* -------------------------------------------- */
+/*  Picture fitting                             */
+/* -------------------------------------------- */
+
+/**
+ * Fit every slot picture in a tab to its visible content.
+ * @param {HTMLElement} root
+ */
+function fitPictures(root) {
+  for ( const img of root.querySelectorAll(".items-list li.item img.item-image") ) fitPicture(img);
+}
+
+/**
+ * Size and place a picture inside its slot from where its visible content sits. Measurements are
+ * cached by URL, so each picture is read once per session and re-renders apply the fit immediately.
+ * @param {HTMLImageElement} img
+ */
+function fitPicture(img) {
+  const src = img?.getAttribute("src");
+  if ( !src ) return;
+  const known = pictureFits.get(src);
+  if ( known instanceof Promise ) known.then(fit => applyFit(img, fit));
+  else if ( known !== undefined ) applyFit(img, known);
+  else {
+    const pending = measurePicture(src).then(fit => {
+      pictureFits.set(src, fit);
+      return fit;
+    });
+    pictureFits.set(src, pending);
+    pending.then(fit => applyFit(img, fit));
+  }
+}
+
+/**
+ * Pictures painted on their own background cover the slot with that background; cut-out objects
+ * on transparency are shown whole, as large as the slot allows, so long thin ones aren't cropped away.
+ * @param {HTMLImageElement} img
+ * @param {object|null} fit
+ */
+function applyFit(img, fit) {
+  if ( !fit || !img.isConnected ) return;
+  const { width, height, x, y, w, h, filled } = fit;
+  const span = filled ? Math.min(w * width, h * height) : Math.max(w * width, h * height) / (1 - (2 * PICTURE_PADDING));
+  const centerX = (x + (w / 2)) * width;
+  const centerY = (y + (h / 2)) * height;
+  img.style.setProperty("--ww-fit-w", `${(width / span) * 100}%`);
+  img.style.setProperty("--ww-fit-h", `${(height / span) * 100}%`);
+  img.style.setProperty("--ww-fit-x", `${50 - ((centerX / span) * 100)}%`);
+  img.style.setProperty("--ww-fit-y", `${50 - ((centerY / span) * 100)}%`);
+  img.classList.add("ww-fit");
+}
+
+/**
+ * Load a picture and find the box around its visible pixels.
+ * @param {string} src
+ * @returns {Promise<object|null>}  The content box as fractions of the picture, or null when it can't be read.
+ */
+function measurePicture(src) {
+  return new Promise(resolve => {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.decoding = "async";
+    image.onerror = () => resolve(null);
+    image.onload = () => {
+      // A picture from another site without permission to read it throws here, and keeps the plain crop.
+      try { resolve(contentBox(image)); } catch { resolve(null); }
+    };
+    image.src = src;
+  });
+}
+
+function contentBox(image) {
+  const width = image.naturalWidth;
+  const height = image.naturalHeight;
+  if ( !width || !height ) return null;
+  const scale = Math.min(1, PICTURE_SAMPLE / Math.max(width, height));
+  const cw = Math.max(1, Math.round(width * scale));
+  const ch = Math.max(1, Math.round(height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = cw;
+  canvas.height = ch;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  context.drawImage(image, 0, 0, cw, ch);
+  const { data } = context.getImageData(0, 0, cw, ch);
+
+  let x0 = cw, y0 = ch, x1 = -1, y1 = -1, solid = 0;
+  for ( let py = 0; py < ch; py++ ) {
+    for ( let px = 0; px < cw; px++ ) {
+      if ( data[(((py * cw) + px) * 4) + 3] < PICTURE_ALPHA ) continue;
+      solid++;
+      if ( px < x0 ) x0 = px;
+      if ( px > x1 ) x1 = px;
+      if ( py < y0 ) y0 = py;
+      if ( py > y1 ) y1 = py;
+    }
+  }
+  if ( x1 < 0 ) return null;
+  const bw = x1 - x0 + 1;
+  const bh = y1 - y0 + 1;
+  return { width, height, x: x0 / cw, y: y0 / ch, w: bw / cw, h: bh / ch, filled: (solid / (bw * bh)) >= PICTURE_FILLED };
+}
+
 /**
  * Apply the current view and slot size to a rendered sheet.
  * @param {HTMLElement} element
@@ -587,7 +761,7 @@ function applySheetState(element) {
     slider.hidden = view !== "grid";
     slider.querySelector("input").value = size;
   }
-  fillSlots(element.querySelector('.tab[data-tab="inventory"]'));
+  scheduleFill(element.querySelector('.tab[data-tab="inventory"]'));
 }
 
 /* -------------------------------------------- */
@@ -616,12 +790,21 @@ function esc(text) {
   return String(text ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 }
 
+/** Scroll containers already found, per inventory tab element (a fresh element each render). */
+const scrollParents = new WeakMap();
+
 /** The nearest ancestor that scrolls vertically, which is the space the inventory can grow into. */
 function scrollParent(element) {
+  if ( scrollParents.has(element) ) return scrollParents.get(element);
+  let found = null;
   for ( let el = element?.parentElement; el && !el.classList.contains("application"); el = el.parentElement ) {
-    if ( /auto|scroll/.test(getComputedStyle(el).overflowY) ) return el;
+    if ( /auto|scroll/.test(getComputedStyle(el).overflowY) ) {
+      found = el;
+      break;
+    }
   }
-  return null;
+  if ( element ) scrollParents.set(element, found);
+  return found;
 }
 
 /** dnd5e's own plural label for an item type, such as "Weapons". */
