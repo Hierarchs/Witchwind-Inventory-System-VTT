@@ -426,11 +426,22 @@
   border-bottom: 1px solid var(--ww-line);
 }
 
-.dnd5e2.ww-theme .items-header :is(h3, .item-name, .item-header) {
+.dnd5e2.ww-theme .items-header :is(h3, .item-name) {
   font-family: var(--ww-font-display);
   font-weight: 700;
   letter-spacing: 0.05em;
   color: var(--ww-ink-muted) !important;
+  text-shadow: none !important;
+}
+
+/* Column labels (School, Time, Range, Uses…) in the compact sans: Cinzel ran neighbours together. */
+.dnd5e2.ww-theme .items-header .item-header {
+  font-family: var(--ww-font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ww-ink-faint) !important;
   text-shadow: none !important;
 }
 

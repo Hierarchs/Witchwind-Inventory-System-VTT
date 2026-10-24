@@ -2,7 +2,7 @@
   "id": "witchwind-inventory",
   "title": "Witchwind Inventory",
   "description": "A restyle of dnd5e character and NPC sheets inspired by The Witcher 3 and Morrowind: dark leather and gold throughout, an inventory slot grid with rarity frames, and parchment item cards.",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "authors": [
     { "name": "Hierarchs", "url": "https://github.com/Hierarchs" }
   ],
