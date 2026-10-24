@@ -491,39 +491,22 @@
   display: none !important;
 }
 
-/* Section names become dividers across the grid. */
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-header {
-  grid-column: 1 / -1;
-  justify-self: stretch;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 6px 0 0;
-  background: none !important;
-  border: none !important;
-  box-shadow: none !important;
+/* One continuous grid; the category tabs above it do the sorting by type. */
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .items-header {
+  display: none !important;
 }
 
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-section:first-child .items-header {
-  padding-top: 0;
-}
+/* Empty slots that pad out the grid. */
+.dnd5e2.ww-theme .ww-fillers { display: contents; }
 
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-header::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--ww-line);
-}
-
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-header .item-name {
-  flex: 0 0 auto;
-  padding: 0;
-  font-size: var(--font-size-12, 12px);
-}
-
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-header > :not(.item-name) {
-  display: none;
+.dnd5e2.ww-theme .ww-filler {
+  width: var(--ww-slot, 56px);
+  height: var(--ww-slot, 56px);
+  box-sizing: border-box;
+  background: #191510;
+  border: 1px solid #2c251c;
+  border-radius: 3px;
+  box-shadow: inset 0 2px 6px rgb(0 0 0 / 50%);
 }
 
 /* The slot */
@@ -575,15 +558,34 @@
   display: none;
 }
 
-.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-image {
-  --icon-size: calc(var(--ww-slot, 56px) - 10px);
-  width: calc(var(--ww-slot, 56px) - 10px);
-  height: calc(var(--ww-slot, 56px) - 10px);
+/* Pictures fill the whole slot, cropped to a square whatever their original shape. */
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item img.item-image {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  object-position: center;
+  border: none !important;
+  border-radius: 1px;
+  box-shadow: none !important;
+}
+
+/* dnd5e's own line icons (SVG) keep a little breathing room instead of being cropped. */
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item dnd5e-icon.item-image {
+  --icon-size: calc(var(--ww-slot, 56px) - 16px);
+  width: calc(var(--ww-slot, 56px) - 16px);
+  height: calc(var(--ww-slot, 56px) - 16px);
   min-width: 0;
   min-height: 0;
   border: none !important;
-  border-radius: 2px;
   box-shadow: none !important;
+}
+
+.dnd5e2.ww-theme.ww-grid .tab[data-tab="inventory"] .items-list .item .item-name {
+  overflow: hidden;
 }
 
 /* Equipped: gold diamond, top left */
@@ -626,6 +628,339 @@
   background: var(--ww-attuned);
   clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
   pointer-events: none;
+}
+
+/* -------------------------------------------- */
+/*  Category tabs                               */
+/* -------------------------------------------- */
+
+.dnd5e2.ww-theme .ww-cats {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--ww-line);
+}
+
+.dnd5e2.ww-theme .ww-cats button {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 50px;
+  min-height: 0;
+  margin: 0 0 -1px;
+  padding: 0 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: transparent;
+  color: var(--ww-ink-muted);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  box-shadow: none;
+  font-family: var(--ww-font-display);
+  font-size: var(--font-size-11, 11px);
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+
+.dnd5e2.ww-theme .ww-cats button i { font-size: 16px; margin: 0; }
+.dnd5e2.ww-theme .ww-cats button span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.dnd5e2.ww-theme .ww-cats button.empty { opacity: 0.45; }
+.dnd5e2.ww-theme .ww-cats button:hover { color: var(--ww-ink); background: rgb(201 164 92 / 5%); box-shadow: none; }
+
+.dnd5e2.ww-theme .ww-cats button[aria-pressed="true"] {
+  color: var(--ww-gold);
+  background: rgb(201 164 92 / 8%);
+  border-bottom-color: var(--ww-gold);
+}
+
+.dnd5e2.ww-theme .ww-cats button:focus-visible {
+  outline: 2px solid var(--ww-gold);
+  outline-offset: -2px;
+}
+
+/* Filtering by category: hide other types, and in list view the sections left empty. */
+.dnd5e2.ww-theme .tab[data-ww-cat="weapon"] .items-list .item:not([data-ww-type="weapon"]),
+.dnd5e2.ww-theme .tab[data-ww-cat="equipment"] .items-list .item:not([data-ww-type="equipment"]),
+.dnd5e2.ww-theme .tab[data-ww-cat="consumable"] .items-list .item:not([data-ww-type="consumable"]),
+.dnd5e2.ww-theme .tab[data-ww-cat="tool"] .items-list .item:not([data-ww-type="tool"]),
+.dnd5e2.ww-theme .tab[data-ww-cat="loot"] .items-list .item:not([data-ww-type="loot"]),
+.dnd5e2.ww-theme .tab[data-ww-cat="weapon"] .items-list .items-section:not(:has(.item[data-ww-type="weapon"])),
+.dnd5e2.ww-theme .tab[data-ww-cat="equipment"] .items-list .items-section:not(:has(.item[data-ww-type="equipment"])),
+.dnd5e2.ww-theme .tab[data-ww-cat="consumable"] .items-list .items-section:not(:has(.item[data-ww-type="consumable"])),
+.dnd5e2.ww-theme .tab[data-ww-cat="tool"] .items-list .items-section:not(:has(.item[data-ww-type="tool"])),
+.dnd5e2.ww-theme .tab[data-ww-cat="loot"] .items-list .items-section:not(:has(.item[data-ww-type="loot"])) {
+  display: none !important;
+}
+
+/* With the weight bar moved to the footer, the top strip only holds containers. */
+.dnd5e2.ww-theme .tab[data-tab="inventory"] > .top:not(:has(.container)),
+.dnd5e2.ww-theme .tab[data-tab="inventory"] .inventory-element > .bottom:empty {
+  display: none;
+}
+
+/* -------------------------------------------- */
+/*  Footer: carried weight, attunement, coins   */
+/* -------------------------------------------- */
+
+.dnd5e2.ww-theme .tab[data-tab="inventory"] .ww-footer {
+  position: sticky;
+  bottom: -12px;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  margin: 12px -12px -12px;
+  padding: 10px 14px;
+  background: #0f0d0a;
+  border-top: 1px solid var(--ww-line);
+  border-radius: 0 0 6px 6px;
+}
+
+.dnd5e2.ww-theme .ww-footer .encumbrance {
+  flex: 0 1 280px;
+  min-width: 180px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.dnd5e2.ww-theme .ww-footer .encumbrance .info { display: none; }
+
+.dnd5e2.ww-theme .ww-footer .encumbrance .meter {
+  height: 20px;
+  border: 1px solid var(--ww-line);
+  border-radius: 3px;
+}
+
+.dnd5e2.ww-theme .ww-footer .attunement {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  font-family: var(--ww-font-ui);
+}
+
+.dnd5e2.ww-theme .ww-footer .attunement .fa-sun { color: var(--ww-attuned); }
+
+.dnd5e2.ww-theme .ww-footer section.currency {
+  margin-left: auto;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* -------------------------------------------- */
+/*  Docked detail panel                         */
+/* -------------------------------------------- */
+
+.dnd5e2.ww-theme .ww-detail { display: none; }
+
+.dnd5e2.ww-theme .tab.ww-docked .inventory-element {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-rows: auto auto 1fr;
+  column-gap: 16px;
+  row-gap: 8px;
+}
+
+.dnd5e2.ww-theme .tab.ww-docked .inventory-element > * { grid-column: 1; }
+
+.dnd5e2.ww-theme .tab.ww-docked .inventory-element > .ww-detail {
+  grid-column: 2;
+  grid-row: 1 / 4;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 18px;
+  color: var(--ww-parch-ink);
+  background: var(--ww-parch);
+  border: 1px solid var(--ww-gold-dim);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 0 3px var(--ww-parch),
+    inset 0 0 0 4px var(--ww-gold-dim),
+    inset 0 0 40px rgb(120 84 40 / 30%);
+  font-family: var(--ww-font-body);
+  --color-text-primary: var(--ww-parch-ink);
+  --color-text-secondary: var(--ww-parch-muted);
+  --color-text-tertiary: var(--ww-parch-muted);
+}
+
+/* Follows the item card setting: steel when chosen. */
+body.ww-tooltip-steel .dnd5e2.ww-theme .tab.ww-docked .inventory-element > .ww-detail {
+  color: var(--ww-ink);
+  background: #1b1712;
+  border-color: var(--ww-line-strong);
+  box-shadow: inset 0 0 0 3px #1b1712, inset 0 0 0 4px var(--ww-line);
+  --color-text-primary: var(--ww-ink);
+  --color-text-secondary: var(--ww-ink-muted);
+  --color-text-tertiary: var(--ww-ink-faint);
+}
+
+.ww-detail .ww-detail-card {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.ww-detail .ww-detail-empty {
+  margin: auto;
+  text-align: center;
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+
+/* dnd5e's item card markup: header (picture, name, subtitle), price/charges/weight, description, property pills. */
+.ww-detail .content { display: flex; flex-direction: column; gap: 12px; }
+.ww-detail .header .top { display: flex; align-items: center; gap: 12px; }
+
+.ww-detail .header .top img {
+  width: 64px;
+  height: 64px;
+  flex: none;
+  object-fit: cover;
+  border: 2px solid var(--ww-frame, var(--ww-gold-dim));
+  border-radius: 3px;
+}
+
+.ww-detail .header .name { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+
+.ww-detail .header .title {
+  font-family: var(--ww-font-display);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ww-parch-head);
+}
+
+body.ww-tooltip-steel .ww-detail .header .title { color: var(--ww-gold); }
+
+.ww-detail .header .subtitle {
+  font-family: var(--ww-font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Ornamental rule under the name: line, diamond, line. */
+.ww-detail .header .bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ww-gold-dim);
+  font-family: var(--ww-font-ui);
+  font-size: 14px;
+  position: relative;
+}
+
+.ww-detail .header .bottom::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: calc(50% - 3px);
+  width: 6px;
+  height: 6px;
+  background: var(--ww-gold-dim);
+  transform: rotate(45deg);
+}
+
+.ww-detail .header .bottom > div { display: flex; align-items: center; gap: 4px; }
+.ww-detail .header .bottom > div:empty { display: none; }
+.ww-detail .header .bottom i { color: var(--color-text-secondary); font-size: 11px; }
+
+.ww-detail .description {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.ww-detail .description p { margin: 0 0 0.6em; }
+
+.ww-detail .pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ww-detail .pills .pill {
+  padding: 2px 8px;
+  background: transparent;
+  border: 1px solid var(--ww-gold-dim);
+  border-radius: 10px;
+  font-family: var(--ww-font-ui);
+  font-size: 12px;
+}
+
+.ww-detail .ww-detail-actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+
+.ww-detail .ww-detail-actions button {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 38px;
+  margin: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--ww-gold-dim);
+  border-radius: 3px;
+  box-shadow: none;
+  font-family: var(--ww-font-display);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ww-detail .ww-detail-actions button.primary {
+  background: var(--ww-parch-ink);
+  color: #f1e6cc;
+  border-color: var(--ww-parch-ink);
+}
+
+body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
+  background: var(--ww-gold);
+  color: #1a140d;
+  border-color: var(--ww-gold);
+}
+
+.ww-detail .ww-detail-actions button:hover:not(:disabled) { filter: brightness(1.1); box-shadow: none; }
+.ww-detail .ww-detail-actions button:disabled { opacity: 0.45; }
+.ww-detail .ww-detail-actions button:focus-visible { outline: 2px solid var(--ww-gold); outline-offset: 2px; }
+
+/* The item shown in the panel gets a gold ring. */
+.dnd5e2.ww-theme.ww-grid .tab.ww-docked .items-list .item[data-ww-selected] {
+  box-shadow: 0 0 0 2px var(--ww-ground), 0 0 0 4px var(--ww-gold), 0 0 14px rgb(201 164 92 / 40%);
+}
+
+.dnd5e2.ww-theme:not(.ww-grid) .tab.ww-docked .items-list .item[data-ww-selected] {
+  background: rgb(201 164 92 / 10%);
+}
+
+/* -------------------------------------------- */
+/*  Leftover theme colors                       */
+/* -------------------------------------------- */
+
+/* Some sheet layouts paint a colored band behind the tab names. */
+.dnd5e2.sheet.actor.ww-theme :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs) {
+  background: var(--ww-leather) !important;
+  border-color: var(--ww-line) !important;
 }
 
 /* -------------------------------------------- */

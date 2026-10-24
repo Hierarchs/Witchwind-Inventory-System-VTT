@@ -22,6 +22,15 @@
     "SlotSize": "Slot size",
     "ViewToggle": "Inventory layout",
     "ViewGrid": "Grid view",
-    "ViewList": "List view"
+    "ViewList": "List view",
+    "Categories": "Item categories",
+    "CategoryAll": "All",
+    "Details": "Item details",
+    "NoItem": "Hover over an item to see its details.",
+    "Use": "Use",
+    "Equip": "Equip",
+    "Unequip": "Unequip",
+    "Attune": "Attune",
+    "Unattune": "Unattune"
   }
 }
