@@ -1,0 +1,41 @@
+{
+  "id": "witchwind-inventory",
+  "title": "Witchwind Inventory",
+  "description": "A restyle of the dnd5e character inventory inspired by The Witcher 3 and Morrowind: a slot grid with rarity frames, a resizable layout and parchment item cards.",
+  "version": "0.1.0",
+  "authors": [
+    { "name": "Hierarchs", "url": "https://github.com/Hierarchs" }
+  ],
+  "url": "https://github.com/Hierarchs/Witchwind-Inventory-System-VTT",
+  "manifest": "https://raw.githubusercontent.com/Hierarchs/Witchwind-Inventory-System-VTT/main/module.json",
+  "download": "https://raw.githubusercontent.com/Hierarchs/Witchwind-Inventory-System-VTT/main/dist/witchwind-inventory.zip",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.369"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "6.0.0",
+          "verified": "6.0.6"
+        }
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/witchwind.mjs"
+  ],
+  "styles": [
+    "styles/witchwind.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ]
+}

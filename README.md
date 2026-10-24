@@ -1,0 +1,46 @@
+# Witchwind Inventory
+
+A restyle of the dnd5e character sheet's inventory tab, inspired by The Witcher 3 and Morrowind.
+
+- **Slot grid.** Items become square slots on dark leather, framed by rarity (uncommon green, rare blue, very rare purple, legendary orange, artifact red). A gold diamond marks equipped items, a violet star marks attuned ones, and stack sizes sit in the corner.
+- **Resizable.** A slider on the inventory tab sets the slot size (44 to 80 px). Each player's choice is saved on their own device.
+- **Grid or list.** A toggle switches back to dnd5e's rows, restyled to match.
+- **Parchment item cards.** Hovering an item shows dnd5e's item card on parchment with a double gold rule. It can be switched to a dark steel style or the dnd5e default.
+
+Everything else is dnd5e's own behavior: click to use, drag and drop, right-click menus, search, sort and filters all work as normal. Unidentified items show a neutral frame to players so rarity doesn't give them away.
+
+## Requirements
+
+- Foundry VTT v14
+- dnd5e 6.0 or newer
+
+## Installing
+
+Install it from this manifest URL (Foundry's **Install Module** dialog, or your host's module manager):
+
+```
+https://raw.githubusercontent.com/Hierarchs/Witchwind-Inventory-System-VTT/main/module.json
+```
+
+Then enable **Witchwind Inventory** in your world's module settings.
+
+## Releasing a new version
+
+1. Bump `version` in `module.json`.
+2. Run `build.ps1` to rebuild `dist/witchwind-inventory.zip`.
+3. Commit and push. Foundry will offer the update the next time it checks.
+
+## Settings
+
+Under **Configure Settings > Witchwind Inventory**:
+
+| Setting | What it does |
+|---|---|
+| Restyle character inventory | Turns the restyle on or off for you. |
+| Slot size | Default slot size in grid view. |
+| Item card style | Parchment, Steel, or dnd5e default. |
+
+## Notes
+
+- The fonts (Cinzel, Alegreya, Alegreya Sans) load from Google Fonts. Without an internet connection the sheet falls back to Foundry's fonts.
+- Only character sheets are restyled. NPC, vehicle and group sheets are untouched.

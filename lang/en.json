@@ -1,0 +1,27 @@
+{
+  "WITCHWIND": {
+    "Settings": {
+      "Enabled": {
+        "Name": "Restyle character inventory",
+        "Hint": "Show the dnd5e character sheet's inventory tab in the Witchwind style. This only changes your own view."
+      },
+      "SlotSize": {
+        "Name": "Slot size",
+        "Hint": "Size of each inventory slot in grid view, in pixels. You can also change it with the slider on the inventory tab."
+      },
+      "TooltipStyle": {
+        "Name": "Item card style",
+        "Hint": "How the card that appears when you hover over an item looks.",
+        "Choices": {
+          "parchment": "Parchment",
+          "steel": "Steel",
+          "system": "dnd5e default"
+        }
+      }
+    },
+    "SlotSize": "Slot size",
+    "ViewToggle": "Inventory layout",
+    "ViewGrid": "Grid view",
+    "ViewList": "List view"
+  }
+}
