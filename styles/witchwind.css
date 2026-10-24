@@ -1024,6 +1024,11 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
   display: none !important;
 }
 
+/* The teal band under the header: a blue gradient painted on the window content's ::after layer. */
+.dnd5e2.sheet.actor.ww-theme .window-content::after {
+  background: none !important;
+}
+
 /*
  * Some sheet layouts (yours adds a horizontal tab strip) paint a colored band behind the tab names,
  * either on the strip itself, on whatever wraps it, or on the window content. Let the leather through.
