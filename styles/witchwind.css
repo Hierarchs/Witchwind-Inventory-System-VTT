@@ -1392,7 +1392,11 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
   display: none !important;
 }
 
-/* The teal band under the header: a blue gradient painted on the window content's ::after layer. */
+/*
+ * The teal band: a blue gradient (rgb 68 147 173, fading out by 340px) painted on an ::after layer.
+ * On character sheets it sits on the window content; on NPC sheets, on the window itself.
+ */
+.dnd5e2.sheet.ww-theme::after,
 .dnd5e2.sheet.ww-theme .window-content::after {
   background: none !important;
 }
