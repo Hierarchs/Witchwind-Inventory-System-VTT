@@ -102,7 +102,7 @@ function onRenderActorSheet(app, element) {
   annotateItems(app.actor, tab);
   injectControls(tab);
   injectCategories(tab, inventory, state);
-  buildFooter(tab, inventory);
+  buildFooter(app.actor, tab, inventory);
   injectDetailPanel(app, tab, inventory, state);
   applySheetState(element);
   observeLayout(tab, inventory, state);
@@ -229,11 +229,12 @@ function setCategory(tab, category) {
  * @param {HTMLElement} tab
  * @param {HTMLElement} inventory
  */
-function buildFooter(tab, inventory) {
+function buildFooter(actor, tab, inventory) {
   if ( tab.querySelector(".ww-footer") ) return;
+  const encumbrance = tab.querySelector(".top .encumbrance") ?? inventory.querySelector(".bottom .encumbrance");
   const parts = [
-    tab.querySelector(".top .encumbrance") ?? inventory.querySelector(".bottom .encumbrance"),
-    inventory.querySelector(".middle .attunement"),
+    encumbrance ? carriedBlock(encumbrance) : null,
+    attunementBlock(actor),
     inventory.querySelector("section.currency")
   ].filter(Boolean);
   if ( !parts.length ) return;
@@ -242,6 +243,44 @@ function buildFooter(tab, inventory) {
   footer.className = "ww-footer";
   footer.append(...parts);
   tab.append(footer);
+}
+
+/**
+ * Wrap dnd5e's encumbrance meter with a "Carried 35 / 150" line above it, read from the meter's own label.
+ * @param {HTMLElement} encumbrance
+ * @returns {HTMLElement}
+ */
+function carriedBlock(encumbrance) {
+  const value = encumbrance.querySelector(".label .value")?.textContent.trim();
+  const max = encumbrance.querySelector(".label .max")?.textContent.trim();
+  const block = document.createElement("div");
+  block.className = "ww-carried";
+  block.innerHTML = `
+    <div class="ww-carried-head">
+      <span class="ww-carried-label">${t("Carried")}</span>
+      <span class="ww-carried-value"></span>
+    </div>`;
+  if ( value && max ) block.querySelector(".ww-carried-value").textContent = `${value} / ${max}`;
+  block.append(encumbrance);
+  return block;
+}
+
+/**
+ * "Attuned ●●○ 2 / 3", as in the concept, from the actor's attunement count and limit.
+ * @param {Actor} actor
+ * @returns {HTMLElement|null}
+ */
+function attunementBlock(actor) {
+  const { value = 0, max = 0 } = actor?.system.attributes?.attunement ?? {};
+  if ( !max ) return null;
+  const block = document.createElement("div");
+  block.className = "ww-attune";
+  const pips = Array.from({ length: Math.min(max, 10) }, (_, i) => `<span class="ww-pip${i < value ? " filled" : ""}"></span>`);
+  block.innerHTML = `
+    <span class="ww-attune-label">${t("Attuned")}</span>
+    <span class="ww-attune-pips" aria-hidden="true">${pips.join("")}</span>
+    <span class="ww-attune-count">${value} / ${max}</span>`;
+  return block;
 }
 
 /**
@@ -290,12 +329,11 @@ async function showDetail(app, tab, panel, itemId, state) {
 
   // Hovering quickly across slots starts several loads; only the latest one gets to draw.
   const request = state.detailRequest = (state.detailRequest ?? 0) + 1;
-  const tooltip = await item.richTooltip?.();
+  const html = await detailHTML(item);
   if ( (request !== state.detailRequest) || !panel.isConnected ) return;
 
   panel.dataset.wwRarity = rarityOf(item);
-  panel.innerHTML = `<div class="ww-detail-card">${tooltip?.content ?? `<p>${item.name}</p>`}</div>`;
-  panel.querySelector(".control-hint")?.remove();
+  panel.innerHTML = html;
 
   const actions = document.createElement("div");
   actions.className = "ww-detail-actions";
@@ -325,6 +363,133 @@ async function showDetail(app, tab, panel, itemId, state) {
 }
 
 /**
+ * Build the detail panel's contents: name, rarity and type, a headline stat, a stat list and the description.
+ * @param {Item} item
+ * @returns {Promise<string>}
+ */
+async function detailHTML(item) {
+  const system = item.system;
+  const labels = item.labels ?? {};
+  const concealed = (system.identified === false) && !game.user.isGM;
+  const rarity = rarityOf(item);
+
+  const name = concealed ? (system.unidentified?.name || item.name) : item.name;
+  const subtitle = [
+    rarity === "mundane" ? "" : loc(CONFIG.DND5E.itemRarity?.[rarity]),
+    system.type?.label || loc(CONFIG.Item.typeLabels?.[item.type])
+  ].filter(Boolean).join(" · ");
+  const key = concealed ? null : headlineStat(item, labels);
+  const stats = concealed ? physicalStats(item) : [...combatStats(item, labels), ...physicalStats(item), ...stateStats(item)];
+  const description = await enrich(concealed ? system.unidentified?.description : system.description?.value, item);
+
+  return `
+    <div class="ww-detail-scroll">
+      <header class="ww-d-head">
+        <h3 class="ww-d-name">${esc(name)}</h3>
+        ${subtitle ? `<p class="ww-d-sub">${esc(subtitle)}</p>` : ""}
+      </header>
+      <div class="ww-d-rule" aria-hidden="true"><span></span></div>
+      <div class="ww-d-key">
+        <img src="${esc(item.img)}" alt="">
+        ${key ? `<div class="ww-d-key-text">
+          <span class="ww-d-key-label">${esc(key.label)}</span>
+          <span class="ww-d-key-value">${esc(key.value)}</span>
+        </div>` : ""}
+      </div>
+      ${stats.length ? `<dl class="ww-d-stats">${stats.map(([label, value]) => `
+        <div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}
+      </dl>` : ""}
+      ${description ? `<div class="ww-d-desc">${description}</div>` : ""}
+    </div>`;
+}
+
+/** The one number that matters most for an item: damage, armor class, a tool's check, or uses left. */
+function headlineStat(item, labels) {
+  const system = item.system;
+  const damage = (labels.damages ?? []).map(d => {
+    const type = loc(CONFIG.DND5E.damageTypes?.[d.damageType]) || loc(CONFIG.DND5E.healingTypes?.[d.damageType]);
+    return [d.formula, type?.toLowerCase()].filter(Boolean).join(" ");
+  }).filter(Boolean);
+  if ( damage.length ) return { label: t(item.type === "weapon" ? "Damage" : "Effect"), value: damage.join(", ") };
+  if ( (item.type === "weapon") && labels.damage ) {
+    return { label: t("Damage"), value: [labels.damage, labels.damageTypes?.toLowerCase()].filter(Boolean).join(" ") };
+  }
+  if ( (item.type === "equipment") && system.armor?.value ) return { label: t("ArmorClass"), value: armorText(system) };
+  if ( (item.type === "tool") && system.ability ) {
+    return { label: t("Check"), value: loc(CONFIG.DND5E.abilities?.[system.ability]) };
+  }
+  if ( system.uses?.max ) return { label: t("Uses"), value: `${system.uses.value ?? 0} / ${system.uses.max}` };
+  return null;
+}
+
+function armorText(system) {
+  const value = system.armor.value;
+  switch ( system.type?.value ) {
+    case "shield": return `+${value}`;
+    case "light": return `${value} + Dex`;
+    case "medium": return `${value} + Dex (max ${system.armor.dex ?? 2})`;
+    default: return String(value);
+  }
+}
+
+/** To hit, range or reach, properties and weapon mastery. */
+function combatStats(item, labels) {
+  const system = item.system;
+  const stats = [];
+  if ( labels.toHit ) stats.push([t("ToHit"), labels.toHit]);
+  if ( labels.range ) stats.push([t("Range"), labels.range]);
+  else if ( system.range?.reach ) stats.push([t("Reach"), `${number(system.range.reach)} ${system.range.units ?? ""}`.trim()]);
+  const properties = (labels.properties ?? []).map(p => p.label).filter(Boolean);
+  if ( properties.length ) stats.push([t("Properties"), properties.join(", ")]);
+  const mastery = loc(CONFIG.DND5E.weaponMasteries?.[system.mastery]);
+  if ( mastery ) stats.push([t("Mastery"), mastery]);
+  return stats;
+}
+
+/** Weight, value and quantity. */
+function physicalStats(item) {
+  const system = item.system;
+  const stats = [];
+  const each = (Number(system.quantity) > 1) ? ` ${t("Each")}` : "";
+  const weight = system.weight?.value;
+  if ( weight ) {
+    const units = loc(CONFIG.DND5E.weightUnits?.[system.weight.units], "abbreviation") || system.weight.units || "lb";
+    stats.push([t("Weight"), `${number(weight)} ${units}${each}`]);
+  }
+  const price = system.price?.value;
+  if ( price ) {
+    const denomination = loc(CONFIG.DND5E.currencies?.[system.price.denomination], "abbreviation") || system.price.denomination;
+    stats.push([t("Value"), `${number(price)} ${denomination}${each}`]);
+  }
+  if ( Number.isNumeric(system.quantity) && (Number(system.quantity) !== 1) ) stats.push([t("Quantity"), String(system.quantity)]);
+  return stats;
+}
+
+/** Charges, attunement and whether it's equipped. */
+function stateStats(item) {
+  const system = item.system;
+  const stats = [];
+  if ( system.uses?.max && (item.type !== "tool") && !headlineIsUses(item) ) {
+    stats.push([t("Uses"), `${system.uses.value ?? 0} / ${system.uses.max}`]);
+  }
+  if ( system.attunement ) {
+    stats.push([t("Attunement"), system.attuned ? t("Attuned") : loc(CONFIG.DND5E.attunementTypes?.[system.attunement])]);
+  }
+  if ( "equipped" in system ) stats.push([t("Status"), t(system.equipped ? "Equipped" : "Carried")]);
+  return stats;
+}
+
+function headlineIsUses(item) {
+  return headlineStat(item, item.labels ?? {})?.label === t("Uses");
+}
+
+async function enrich(html, item) {
+  if ( !html ) return "";
+  const editor = foundry.applications?.ux?.TextEditor?.implementation ?? globalThis.TextEditor;
+  return editor.enrichHTML(html, { relativeTo: item, rollData: item.getRollData?.(), secrets: item.isOwner });
+}
+
+/**
  * Keep the grid padded with empty slots and dock or undock the detail panel as the sheet resizes or filters.
  * @param {HTMLElement} tab
  * @param {HTMLElement} inventory
@@ -347,6 +512,9 @@ function observeLayout(tab, inventory, state) {
 
   const resize = new ResizeObserver(() => requestAnimationFrame(update));
   resize.observe(inventory);
+  // The sheet growing taller gives the grid more room to fill.
+  const scroller = scrollParent(tab);
+  if ( scroller ) resize.observe(scroller);
   // dnd5e's search and filters show and hide rows with the hidden attribute.
   const filter = new MutationObserver(() => fillSlots(tab));
   filter.observe(list, { attributes: true, attributeFilter: ["hidden"], subtree: true });
@@ -355,7 +523,8 @@ function observeLayout(tab, inventory, state) {
 }
 
 /**
- * Pad the grid with empty slots to complete the last row and reach a minimum height.
+ * Pad the grid with empty slots: complete the last row, then keep adding rows until the inventory
+ * reaches the bottom of the visible sheet, so there's no dead space under the grid.
  * @param {HTMLElement} tab
  */
 function fillSlots(tab) {
@@ -366,10 +535,23 @@ function fillSlots(tab) {
     fillers?.remove();
     return;
   }
+  // A hidden tab has no layout to measure; the resize observer calls back once it's shown.
+  if ( !list.clientWidth ) return;
 
-  const columns = getComputedStyle(list).gridTemplateColumns.split(" ").filter(Boolean).length || 1;
+  const style = getComputedStyle(list);
+  const columns = style.gridTemplateColumns.split(" ").filter(Boolean).length || 1;
+  const step = (parseFloat(style.getPropertyValue("--ww-slot")) || 56) + (parseFloat(style.rowGap) || 8);
   const shown = Array.from(list.querySelectorAll("li.item")).filter(li => li.offsetParent !== null).length;
-  const rows = Math.max(Math.ceil(shown / columns) + 1, MIN_ROWS);
+  const current = fillers?.childElementCount ?? 0;
+
+  let rows = Math.max(Math.ceil(shown / columns) + 1, MIN_ROWS);
+  const scroller = scrollParent(tab);
+  if ( scroller ) {
+    // Measured in the scroller's content coordinates, so scrolling doesn't change the answer.
+    const tabBottom = tab.getBoundingClientRect().bottom - scroller.getBoundingClientRect().top + scroller.scrollTop;
+    const spare = scroller.clientHeight - tabBottom - 8;
+    rows = Math.max(rows, Math.ceil((shown + current) / columns) + Math.floor(spare / step));
+  }
   const count = (rows * columns) - shown;
 
   if ( !fillers ) {
@@ -414,6 +596,32 @@ function applySheetState(element) {
 
 function t(key) {
   return game.i18n.localize(`WITCHWIND.${key}`);
+}
+
+/**
+ * Localize a dnd5e config entry, which may be a translation key or an object holding one.
+ * @param {string|object} entry
+ * @param {string} [property="label"]  Which property to read when the entry is an object.
+ */
+function loc(entry, property="label") {
+  const key = (typeof entry === "object") ? (entry?.[property] ?? entry?.label) : entry;
+  return key ? game.i18n.localize(key) : "";
+}
+
+function number(value) {
+  return globalThis.dnd5e?.utils?.formatNumber?.(value) ?? Number(value).toLocaleString();
+}
+
+function esc(text) {
+  return String(text ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+
+/** The nearest ancestor that scrolls vertically, which is the space the inventory can grow into. */
+function scrollParent(element) {
+  for ( let el = element?.parentElement; el && !el.classList.contains("application"); el = el.parentElement ) {
+    if ( /auto|scroll/.test(getComputedStyle(el).overflowY) ) return el;
+  }
+  return null;
 }
 
 /** dnd5e's own plural label for an item type, such as "Weapons". */

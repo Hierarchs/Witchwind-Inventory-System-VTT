@@ -23,6 +23,7 @@
     "ViewToggle": "Inventory layout",
     "ViewGrid": "Grid view",
     "ViewList": "List view",
+    "Carried": "Carried",
     "Categories": "Item categories",
     "CategoryAll": "All",
     "Details": "Item details",
@@ -31,6 +32,24 @@
     "Equip": "Equip",
     "Unequip": "Unequip",
     "Attune": "Attune",
-    "Unattune": "Unattune"
+    "Unattune": "Unattune",
+    "Attuned": "Attuned",
+    "Damage": "Damage",
+    "Effect": "Effect",
+    "ArmorClass": "Armor Class",
+    "Check": "Check",
+    "Uses": "Uses",
+    "ToHit": "To Hit",
+    "Range": "Range",
+    "Reach": "Reach",
+    "Properties": "Properties",
+    "Mastery": "Mastery",
+    "Weight": "Weight",
+    "Value": "Value",
+    "Each": "each",
+    "Quantity": "Quantity",
+    "Attunement": "Attunement",
+    "Status": "Status",
+    "Equipped": "Equipped"
   }
 }

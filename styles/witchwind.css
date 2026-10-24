@@ -719,9 +719,34 @@
   border-radius: 0 0 6px 6px;
 }
 
-.dnd5e2.ww-theme .ww-footer .encumbrance {
-  flex: 0 1 280px;
+/* Carried weight: a label line over a slim bar, with thin ticks where encumbrance starts. */
+.dnd5e2.ww-theme .ww-footer .ww-carried {
+  flex: 0 1 260px;
   min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dnd5e2.ww-theme .ww-footer .ww-carried-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.dnd5e2.ww-theme .ww-footer .ww-carried-label {
+  font-family: var(--ww-font-display);
+  letter-spacing: 0.05em;
+  color: var(--ww-ink-muted);
+}
+
+.dnd5e2.ww-theme .ww-footer .ww-carried-value {
+  font-weight: 500;
+  color: var(--ww-ink);
+}
+
+.dnd5e2.ww-theme .ww-footer .encumbrance {
   margin: 0;
   padding: 0;
   background: none;
@@ -729,26 +754,59 @@
   box-shadow: none;
 }
 
-.dnd5e2.ww-theme .ww-footer .encumbrance .info { display: none; }
+.dnd5e2.ww-theme .ww-footer .encumbrance :is(.info, .meter .label, .breakpoint.arrow-up) {
+  display: none;
+}
 
 .dnd5e2.ww-theme .ww-footer .encumbrance .meter {
-  height: 20px;
+  height: 8px;
   border: 1px solid var(--ww-line);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
-.dnd5e2.ww-theme .ww-footer .attunement {
+.dnd5e2.ww-theme .ww-footer .encumbrance .breakpoint.arrow-down {
+  inset-block: 0;
+  inline-size: 1px;
+  block-size: auto;
+  border: none;
+  background: var(--ww-line-strong);
+}
+
+/* Attunement as in the concept: label, a pip per slot (filled violet when used), then the count. */
+.dnd5e2.ww-theme .ww-footer .ww-attune {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0;
-  background: none;
-  border: none;
-  box-shadow: none;
+  gap: 10px;
   font-family: var(--ww-font-ui);
+  font-size: 14px;
 }
 
-.dnd5e2.ww-theme .ww-footer .attunement .fa-sun { color: var(--ww-attuned); }
+.dnd5e2.ww-theme .ww-footer .ww-attune-label {
+  font-family: var(--ww-font-display);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--ww-ink-muted);
+}
+
+.dnd5e2.ww-theme .ww-footer .ww-attune-pips { display: flex; gap: 5px; }
+
+.dnd5e2.ww-theme .ww-footer .ww-pip {
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border: 1px solid var(--ww-line-strong);
+  border-radius: 50%;
+}
+
+.dnd5e2.ww-theme .ww-footer .ww-pip.filled {
+  background: var(--ww-attuned);
+  border-color: var(--ww-attuned);
+}
+
+.dnd5e2.ww-theme .ww-footer .ww-attune-count { color: var(--ww-ink); }
+
+/* The footer shows attunement now, so dnd5e's own counter beside the search box steps aside. */
+.dnd5e2.ww-theme .tab[data-tab="inventory"] .middle .attunement { display: none; }
 
 .dnd5e2.ww-theme .ww-footer section.currency {
   margin-left: auto;
@@ -801,12 +859,6 @@
   color: var(--ww-ink-muted);
 }
 
-/* Weight bar label: readable over the fill. */
-.dnd5e2.ww-theme .ww-footer .encumbrance .meter .label {
-  padding-inline: 8px;
-  font-size: 12px;
-}
-
 /* -------------------------------------------- */
 /*  Docked detail panel                         */
 /* -------------------------------------------- */
@@ -815,7 +867,7 @@
 
 .dnd5e2.ww-theme .tab.ww-docked .inventory-element {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(0, 1fr) 300px;
   grid-template-rows: auto auto 1fr;
   column-gap: 16px;
   row-gap: 8px;
@@ -831,6 +883,8 @@
   flex-direction: column;
   gap: 12px;
   min-height: 0;
+  /* The panel takes the grid's height instead of setting it, and scrolls a long description inside itself. */
+  contain: size;
   padding: 18px;
   color: var(--ww-parch-ink);
   background: var(--ww-parch);
@@ -857,11 +911,17 @@ body.ww-tooltip-steel .dnd5e2.ww-theme .tab.ww-docked .inventory-element > .ww-d
   --color-text-tertiary: var(--ww-ink-faint);
 }
 
-.ww-detail .ww-detail-card {
+.ww-detail .ww-detail-scroll {
   flex: 1 1 auto;
   min-height: 0;
+  margin-right: -8px;
+  padding-right: 8px;
   overflow-y: auto;
   scrollbar-width: thin;
+  scrollbar-color: var(--ww-gold-dim) transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .ww-detail .ww-detail-empty {
@@ -871,55 +931,49 @@ body.ww-tooltip-steel .dnd5e2.ww-theme .tab.ww-docked .inventory-element > .ww-d
   color: var(--color-text-secondary);
 }
 
-/* dnd5e's item card markup: header (picture, name, subtitle), price/charges/weight, description, property pills. */
-.ww-detail .content { display: flex; flex-direction: column; gap: 12px; }
-.ww-detail .header .top { display: flex; align-items: center; gap: 12px; }
+/* Name, then rarity and type in the rarity's ink color. */
+.ww-detail .ww-d-head { display: flex; flex-direction: column; gap: 4px; }
 
-.ww-detail .header .top img {
-  width: 64px;
-  height: 64px;
-  flex: none;
-  object-fit: cover;
-  border: 2px solid var(--ww-frame, var(--ww-gold-dim));
-  border-radius: 3px;
-}
-
-.ww-detail .header .name { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-
-.ww-detail .header .title {
+.ww-detail .ww-d-name {
+  margin: 0;
+  padding: 0;
+  border: none;
   font-family: var(--ww-font-display);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
+  letter-spacing: 0.02em;
   color: var(--ww-parch-head);
 }
 
-body.ww-tooltip-steel .ww-detail .header .title { color: var(--ww-gold); }
+body.ww-tooltip-steel .ww-detail .ww-d-name { color: var(--ww-gold); }
 
-.ww-detail .header .subtitle {
+.ww-detail .ww-d-sub {
+  margin: 0;
   font-family: var(--ww-font-ui);
   font-size: 13px;
   font-weight: 500;
-  color: var(--color-text-secondary);
+  color: var(--ww-d-ink, var(--color-text-secondary));
 }
 
-/* Ornamental rule under the name: line, diamond, line. */
-.ww-detail .header .bottom {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid var(--ww-gold-dim);
-  font-family: var(--ww-font-ui);
-  font-size: 14px;
+.ww-detail[data-ww-rarity="uncommon"] { --ww-d-ink: #2a5f26; }
+.ww-detail[data-ww-rarity="rare"] { --ww-d-ink: #1f5c9e; }
+.ww-detail[data-ww-rarity="veryRare"] { --ww-d-ink: #6b3fa0; }
+.ww-detail[data-ww-rarity="legendary"] { --ww-d-ink: #87480c; }
+.ww-detail[data-ww-rarity="artifact"] { --ww-d-ink: #8f2a1e; }
+body.ww-tooltip-steel .ww-detail[data-ww-rarity] { --ww-d-ink: var(--ww-rarity-text); }
+
+/* Ornamental rule: line, diamond, line. */
+.ww-detail .ww-d-rule {
   position: relative;
+  flex: none;
+  height: 1px;
+  background: var(--ww-gold-dim);
 }
 
-.ww-detail .header .bottom::before {
-  content: "";
+.ww-detail .ww-d-rule span {
   position: absolute;
-  top: -4px;
+  top: -3px;
   left: calc(50% - 3px);
   width: 6px;
   height: 6px;
@@ -927,42 +981,75 @@ body.ww-tooltip-steel .ww-detail .header .title { color: var(--ww-gold); }
   transform: rotate(45deg);
 }
 
-.ww-detail .header .bottom > div { display: flex; align-items: center; gap: 4px; }
-.ww-detail .header .bottom > div:empty { display: none; }
-.ww-detail .header .bottom i { color: var(--color-text-secondary); font-size: 11px; }
-
-.ww-detail .description {
-  font-size: 15px;
-  line-height: 1.45;
-}
-
-.ww-detail .description p { margin: 0 0 0.6em; }
-
-.ww-detail .pills {
+/* Picture in its rarity frame beside the headline stat. */
+.ww-detail .ww-d-key {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  align-items: center;
+  gap: 14px;
 }
 
-.ww-detail .pills .pill {
-  --pill-transparent-color: var(--color-text-primary);
-  --pill-border: 1px solid var(--ww-gold-dim);
-  padding: 2px 8px;
-  background: transparent;
-  border: 1px solid var(--ww-gold-dim);
-  border-radius: 10px;
+.ww-detail .ww-d-key img {
+  width: 64px;
+  height: 64px;
+  flex: none;
+  object-fit: cover;
+  background: rgb(0 0 0 / 15%);
+  border: 2px solid var(--ww-frame, var(--ww-gold-dim));
+  border-radius: 3px;
+}
+
+.ww-detail .ww-d-key-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.ww-detail .ww-d-key-label {
   font-family: var(--ww-font-ui);
   font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
 }
 
-/* The sheet theme sets pill text light for dark panels; on parchment it has to be dark. */
-.ww-detail .pills .pill,
-.ww-detail .pills .pill .label {
-  color: var(--color-text-primary) !important;
+.ww-detail .ww-d-key-value {
+  font-family: var(--ww-font-display);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-text-primary);
 }
+
+/* Stat list: label left, value right, a faint rule between rows. */
+.ww-detail .ww-d-stats {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-family: var(--ww-font-ui);
+  font-size: 14px;
+}
+
+.ww-detail .ww-d-stats > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgb(90 62 30 / 30%);
+}
+
+body.ww-tooltip-steel .ww-detail .ww-d-stats > div { border-bottom-color: rgb(201 164 92 / 20%); }
+
+.ww-detail .ww-d-stats dt { flex: none; color: var(--color-text-secondary); }
+.ww-detail .ww-d-stats dd { margin: 0; text-align: right; font-weight: 500; color: var(--color-text-primary); }
+
+/* Description: dnd5e's rules text, which can be long; the panel scrolls rather than growing. */
+.ww-detail .ww-d-desc {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-text-primary);
+}
+
+.ww-detail .ww-d-desc > :first-child { margin-top: 0; }
+.ww-detail .ww-d-desc p { margin: 0 0 0.6em; }
+.ww-detail .ww-d-desc a { color: var(--ww-parch-head); }
+body.ww-tooltip-steel .ww-detail .ww-d-desc a { color: var(--ww-gold); }
 
 .ww-detail .ww-detail-actions {
   display: flex;
@@ -975,6 +1062,11 @@ body.ww-tooltip-steel .ww-detail .header .title { color: var(--ww-gold); }
   min-width: 0;
   height: 38px;
   margin: 0;
+  padding: 0 4px;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   background: transparent;
   color: var(--color-text-primary);
   border: 1px solid var(--ww-gold-dim);
