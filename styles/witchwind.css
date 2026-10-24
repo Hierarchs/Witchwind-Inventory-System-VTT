@@ -753,9 +753,58 @@
 .dnd5e2.ww-theme .ww-footer section.currency {
   margin-left: auto;
   padding: 0;
+  gap: 12px;
+  align-items: center;
   background: none;
   border: none;
   box-shadow: none;
+}
+
+/* Coins as in the mockup: the coin, then its count, side by side. */
+.dnd5e2.ww-theme .ww-footer section.currency label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dnd5e2.ww-theme .ww-footer section.currency label i {
+  position: static;
+  flex: none;
+}
+
+.dnd5e2.ww-theme .ww-footer section.currency input {
+  width: 52px;
+  max-width: 52px;
+  padding: 4px 6px;
+  text-align: right;
+  background: rgb(0 0 0 / 30%);
+  border: 1px solid var(--ww-line);
+  border-radius: 3px;
+  box-shadow: none;
+  font-family: var(--ww-font-ui);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.dnd5e2.ww-theme .ww-footer section.currency input:is(:hover, :focus) {
+  border-color: var(--ww-gold-dim);
+  box-shadow: none;
+}
+
+.dnd5e2.ww-theme .ww-footer section.currency button {
+  width: 30px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--ww-line);
+  border-radius: 3px;
+  box-shadow: none;
+  color: var(--ww-ink-muted);
+}
+
+/* Weight bar label: readable over the fill. */
+.dnd5e2.ww-theme .ww-footer .encumbrance .meter .label {
+  padding-inline: 8px;
+  font-size: 12px;
 }
 
 /* -------------------------------------------- */
@@ -899,12 +948,20 @@ body.ww-tooltip-steel .ww-detail .header .title { color: var(--ww-gold); }
 }
 
 .ww-detail .pills .pill {
+  --pill-transparent-color: var(--color-text-primary);
+  --pill-border: 1px solid var(--ww-gold-dim);
   padding: 2px 8px;
   background: transparent;
   border: 1px solid var(--ww-gold-dim);
   border-radius: 10px;
   font-family: var(--ww-font-ui);
   font-size: 12px;
+}
+
+/* The sheet theme sets pill text light for dark panels; on parchment it has to be dark. */
+.ww-detail .pills .pill,
+.ww-detail .pills .pill .label {
+  color: var(--color-text-primary) !important;
 }
 
 .ww-detail .ww-detail-actions {
@@ -956,6 +1013,16 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
 /* -------------------------------------------- */
 /*  Leftover theme colors                       */
 /* -------------------------------------------- */
+
+/*
+ * dnd5e draws its banner art as a faded layer behind the top of the window. The leather header
+ * covers most of it, but the faded lower edge showed through as a teal band under the header.
+ */
+.dnd5e2.sheet.actor.ww-theme .window-content::before,
+.dnd5e2.sheet.actor.ww-theme:not(.minimized)::before {
+  content: none !important;
+  display: none !important;
+}
 
 /* Some sheet layouts paint a colored band behind the tab names. */
 .dnd5e2.sheet.actor.ww-theme :is(nav.tabs:not(.tabs-right, .tabs-left), nav.sheet-tabs) {

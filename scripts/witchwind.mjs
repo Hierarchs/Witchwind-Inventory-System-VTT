@@ -336,8 +336,17 @@ function observeLayout(tab, inventory, state) {
     const docked = inventory.clientWidth >= DOCK_WIDTH;
     if ( docked !== tab.classList.contains("ww-docked") ) {
       tab.classList.toggle("ww-docked", docked);
-      // With the panel docked, the hover card would only repeat it.
-      for ( const name of list.querySelectorAll(".item .item-name") ) name.classList.toggle("item-tooltip", !docked);
+      // With the panel docked, the hover card would only repeat it. dnd5e attaches the card as a
+      // data-tooltip attribute at render, so set that aside while docked and restore it when not.
+      for ( const name of list.querySelectorAll(".item .item-name") ) {
+        if ( docked && ("tooltip" in name.dataset) ) {
+          name.dataset.wwTooltip = name.dataset.tooltip;
+          delete name.dataset.tooltip;
+        } else if ( !docked && ("wwTooltip" in name.dataset) ) {
+          name.dataset.tooltip = name.dataset.wwTooltip;
+          delete name.dataset.wwTooltip;
+        }
+      }
     }
     fillSlots(tab);
   };
