@@ -1599,6 +1599,80 @@ body.ww-tooltip-steel .ww-detail .ww-detail-actions button.primary {
 }
 
 /* -------------------------------------------- */
+/*  NPC sheet header                            */
+/* -------------------------------------------- */
+
+/* The ability strip: a plaque with a double rule, like the character's ability scores. */
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header .ability-scores.card {
+  background: var(--ww-panel) !important;
+  border: 1px solid var(--ww-gold-dim) !important;
+  box-shadow: inset 0 0 0 2px var(--ww-panel), inset 0 0 0 3px var(--ww-line) !important;
+}
+
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header .ability-scores .ability-score {
+  border-right-color: var(--ww-line) !important;
+}
+
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header .ability-scores .ability-score .label {
+  font-family: var(--ww-font-ui);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ww-gold-dim);
+}
+
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header .ability-scores .ability-score .mod {
+  font-family: var(--ww-font-display);
+  color: var(--ww-ink);
+}
+
+/* The score sits in a small gold-edged box (the shared ability score rule draws the box). */
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header .ability-scores .ability-score .score {
+  min-width: 30px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Save tabs hanging under each ability: dark, gold-edged, gold figure. */
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header .ability-scores .save-tab {
+  background: #0f0d0a !important;
+  border: 1px solid var(--ww-gold-dim) !important;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 50%) !important;
+}
+
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header .ability-scores .save-tab .save {
+  color: var(--ww-gold);
+  font-family: var(--ww-font-ui);
+}
+
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header .ability-scores .save-tab > i {
+  color: var(--ww-gold-dim);
+}
+
+/* Size, type and alignment; proficiency. */
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header .labels {
+  font-family: var(--ww-font-ui);
+  color: var(--ww-gold-dim);
+}
+
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header .proficiency > span {
+  font-family: var(--ww-font-ui);
+  color: var(--ww-ink-muted);
+}
+
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header .proficiency > strong {
+  font-family: var(--ww-font-display);
+  color: var(--ww-gold);
+}
+
+.dnd5e2.sheet.actor.npc.ww-theme .sheet-header .legendary span.label {
+  font-family: var(--ww-font-ui);
+  letter-spacing: 0.04em;
+  color: var(--ww-ink-muted);
+}
+
+/* -------------------------------------------- */
 /*  Container window (bags, chests)             */
 /* -------------------------------------------- */
 
