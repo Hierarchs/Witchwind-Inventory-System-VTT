@@ -14,6 +14,8 @@ A restyle of dnd5e character and NPC sheets, inspired by The Witcher 3 and Morro
 - **Bags and other containers.** A container's own window gets the leather header and the same slot grid for its contents, with a footer showing its capacity and coins.
 - **Item sheets.** Weapons, spells, feats and every other item window get the leather header and theme; descriptions read as parchment pages.
 - **Footer.** Carried weight, attunement, total worth and coins sit in one bar along the bottom. The weight bar turns amber when encumbered, orange when heavily encumbered and red when over the limit.
+- **Quick handling.** Double-click an item to equip or unequip it (a single click still uses it). Order the grid by type, rarity or value from the toolbar. Hover a bag in the top strip to peek at what's inside without opening it.
+- **Sounds (off by default).** A soft clink on equipping and coins when money changes, made in the browser and following Foundry's interface volume.
 - **Compare and spot new loot.** Hovering an unequipped weapon or armor shows how it compares with what's equipped (average damage, or armor class with your Dexterity). Items you haven't looked at yet carry a small gold dot until you hover them.
 - **Resizable.** A slider on the inventory tab sets the slot size (44 to 80 px). Each player's choice is saved on their own device.
 - **Grid or list.** A toggle switches back to dnd5e's rows, restyled to match.
@@ -55,6 +57,7 @@ Under **Configure Settings > Witchwind Inventory**:
 | Restyle sheets | Turns the sheet restyle on or off for you. |
 | Slot size | Default slot size in grid view. |
 | Item card style | Parchment, Steel, or dnd5e default. |
+| Sounds | Equip and coin sounds. Off by default. |
 
 ## Notes
 

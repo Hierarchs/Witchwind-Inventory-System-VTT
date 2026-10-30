@@ -74,6 +74,22 @@ Hooks.once("init", () => {
     onChange: applyTooltipStyle
   });
 
+  register("sounds", {
+    name: "WITCHWIND.Settings.Sounds.Name",
+    hint: "WITCHWIND.Settings.Sounds.Hint",
+    config: true,
+    type: Boolean,
+    default: false
+  });
+
+  // Type, rarity or value order, switched from the inventory tab itself.
+  register("sortMode", {
+    config: false,
+    type: String,
+    default: "type",
+    onChange: refreshSheets
+  });
+
   // Grid or list, switched from the inventory tab itself.
   register("view", {
     config: false,
@@ -102,6 +118,18 @@ Hooks.on("renderContainerSheet", onRenderContainerSheet);
 Hooks.on("closeContainerSheet", onCloseActorSheet);
 Hooks.on("renderItemSheet5e", onRenderItemSheet);
 
+// Sounds: a clink when this user equips or unequips something, coins when money changes. Coins also play
+// when someone else (the GM handing out loot) changes the coins of a character this player owns.
+Hooks.on("updateItem", (item, changes, options, userId) => {
+  if ( userId !== game.user.id ) return;
+  if ( foundry.utils.hasProperty(changes, "system.equipped") ) playSound("equip");
+  else if ( foundry.utils.hasProperty(changes, "system.currency") ) playSound("coins");
+});
+Hooks.on("updateActor", (actor, changes, options, userId) => {
+  if ( !foundry.utils.hasProperty(changes, "system.currency") ) return;
+  if ( (userId === game.user.id) || (actor.isOwner && !game.user.isGM) ) playSound("coins");
+});
+
 /* -------------------------------------------- */
 /*  Rendering                                   */
 /* -------------------------------------------- */
@@ -112,6 +140,7 @@ Hooks.on("renderItemSheet5e", onRenderItemSheet);
  * @param {HTMLElement} element
  */
 function onRenderActorSheet(app, element) {
+  hideBagPeek();
   element.classList.add("ww-sheet");
   const enabled = game.settings.get(MODULE_ID, "enabled");
   element.classList.toggle("ww-theme", enabled);
@@ -133,6 +162,8 @@ function onRenderActorSheet(app, element) {
       worth: worthBlock(actorWorth(app.actor))
     });
     injectDetailPanel(find, tab, inventory, state);
+    setupDoubleClick(tab, find);
+    setupBagPeek(tab, app.actor?.items);
     observeLayout(tab, inventory, state);
   }
 
@@ -185,6 +216,7 @@ function onRenderContainerSheet(app, element) {
     injectControls(tab);
     buildFooter(tab, inventory, { weightLabel: "Capacity", worth: worthBlock(containerWorth(container)) });
     injectDetailPanel(find, tab, inventory, state);
+    setupDoubleClick(tab, find);
     observeLayout(tab, inventory, state);
   }
   applySheetState(element);
@@ -208,6 +240,7 @@ function tabState(app, id) {
  * @param {ApplicationV2} app
  */
 function onCloseActorSheet(app) {
+  hideBagPeek();
   for ( const state of sheetStates.get(app)?.values() ?? [] ) {
     for ( const observer of state.observers ) observer.disconnect();
     state.observers = [];
@@ -223,14 +256,219 @@ function annotateItems(find, root) {
   for ( const el of root.querySelectorAll("li.item[data-item-id], .containers .container[data-item-id]") ) {
     const item = find(el.dataset.itemId);
     if ( !item ) continue;
-    const { rarity, equipped, attuned, quantity } = item.system;
+    const { equipped, attuned, quantity } = item.system;
     el.dataset.wwType = item.type;
     el.dataset.wwRarity = rarityOf(item);
+    el.dataset.wwValue = itemsWorth([item]);
     toggleData(el, "wwEquipped", equipped === true);
     toggleData(el, "wwAttuned", attuned === true);
+    toggleData(el, "wwEquippable", ("equipped" in item.system) && item.isOwner);
 
     if ( Number.isNumeric(quantity) && (Number(quantity) !== 1) ) el.dataset.wwQty = quantity;
     else delete el.dataset.wwQty;
+  }
+}
+
+/* -------------------------------------------- */
+/*  Double-click to equip                       */
+/* -------------------------------------------- */
+
+/** How long a click on an equippable item waits to see whether a second click makes it a double-click. */
+const DOUBLE_CLICK_MS = 260;
+
+/** Clicks the module passes on to dnd5e after deciding they weren't half of a double-click. */
+const replayedClicks = new WeakSet();
+
+/**
+ * Double-clicking an equippable item equips or unequips it. A single click still uses the item as dnd5e
+ * does, but for equippable items it waits briefly first, so the two clicks of a double-click don't use it
+ * twice. The held click is then replayed to dnd5e with the same modifier keys (Shift and so on).
+ * @param {HTMLElement} tab
+ * @param {function(string): Item} find
+ */
+function setupDoubleClick(tab, find) {
+  const list = tab.querySelector(".items-list");
+  if ( !list ) return;
+  let pending = null;
+
+  list.addEventListener("click", event => {
+    if ( replayedClicks.has(event) ) return;
+    const control = event.target.closest(".item-name[data-action]");
+    const row = control?.closest("li.item[data-ww-equippable]");
+    if ( !row ) return;
+    // Caught on the way down, before dnd5e's own handler on the item sees it.
+    event.stopPropagation();
+    event.preventDefault();
+    clearTimeout(pending);
+    if ( event.detail > 1 ) return;
+    const init = {
+      bubbles: true, cancelable: true, detail: 1, clientX: event.clientX, clientY: event.clientY,
+      shiftKey: event.shiftKey, ctrlKey: event.ctrlKey, altKey: event.altKey, metaKey: event.metaKey
+    };
+    pending = setTimeout(() => {
+      const replay = new MouseEvent("click", init);
+      replayedClicks.add(replay);
+      control.dispatchEvent(replay);
+    }, DOUBLE_CLICK_MS);
+  }, true);
+
+  list.addEventListener("dblclick", event => {
+    const row = event.target.closest("li.item[data-ww-equippable]");
+    if ( !row ) return;
+    clearTimeout(pending);
+    event.preventDefault();
+    const item = find(row.dataset.itemId);
+    if ( item?.isOwner ) item.update({ "system.equipped": !item.system.equipped });
+  });
+}
+
+/* -------------------------------------------- */
+/*  Sorting                                     */
+/* -------------------------------------------- */
+
+const RARITY_RANK = { artifact: 0, legendary: 1, veryRare: 2, rare: 3, uncommon: 4, common: 5, mundane: 6 };
+const TYPE_RANK = { weapon: 1, equipment: 2, consumable: 3, tool: 4, container: 5, loot: 6 };
+const SORT_MODES = [
+  { id: "type", icon: "fa-layer-group" },
+  { id: "rarity", icon: "fa-gem" },
+  { id: "value", icon: "fa-coins" }
+];
+
+/**
+ * Order the slots by type (the default: weapons, equipment, consumables…), by rarity (artifacts and
+ * legendaries first), or by value (most valuable first). Only the display order changes; ties keep
+ * dnd5e's own order, so its sort button still decides within a group.
+ * @param {HTMLElement} tab
+ */
+function applySort(tab) {
+  if ( !tab ) return;
+  const mode = game.settings.get(MODULE_ID, "sortMode");
+  const rows = Array.from(tab.querySelectorAll(".items-list li.item[data-item-id]"));
+  if ( mode === "rarity" ) {
+    for ( const li of rows ) {
+      li.style.order = ((RARITY_RANK[li.dataset.wwRarity] ?? 6) * 10) + (TYPE_RANK[li.dataset.wwType] ?? 7);
+    }
+  } else if ( mode === "value" ) {
+    const byValue = rows.slice().sort((a, b) => (Number(b.dataset.wwValue) || 0) - (Number(a.dataset.wwValue) || 0));
+    byValue.forEach((li, index) => li.style.order = index + 1);
+  } else {
+    for ( const li of rows ) li.style.removeProperty("order");
+  }
+  for ( const button of tab.querySelectorAll(".ww-sort-toggle [data-ww-sort]") ) {
+    button.setAttribute("aria-pressed", String(button.dataset.wwSort === mode));
+  }
+}
+
+/* -------------------------------------------- */
+/*  Bag quick-peek                              */
+/* -------------------------------------------- */
+
+/** The most slots a quick-peek shows; anything beyond is summed up as "+3". */
+const PEEK_SLOTS = 20;
+
+/**
+ * Hovering a bag in the inventory's top strip shows a small grid of what's inside, without opening it.
+ * @param {HTMLElement} tab
+ * @param {Collection} ownerItems  The character's items, which include everything inside their bags.
+ */
+function setupBagPeek(tab, ownerItems) {
+  if ( !ownerItems ) return;
+  for ( const bag of tab.querySelectorAll(".top .containers .container[data-item-id]") ) {
+    // dnd5e's own hover hint only names the bag, which the peek shows anyway.
+    for ( const hinted of bag.querySelectorAll("[data-tooltip]") ) suppressTooltip(hinted, true);
+    bag.addEventListener("pointerenter", () => showBagPeek(bag, ownerItems));
+    bag.addEventListener("pointerleave", hideBagPeek);
+  }
+}
+
+function showBagPeek(anchor, ownerItems) {
+  hideBagPeek();
+  const bag = ownerItems.get(anchor.dataset.itemId);
+  if ( !bag ) return;
+  const contents = ownerItems.filter(i => i.system.container === bag.id);
+  const shown = contents.slice(0, PEEK_SLOTS);
+  const slots = shown.map(item => {
+    const quantity = Number(item.system.quantity);
+    return `<span class="ww-peek-slot" data-ww-rarity="${rarityOf(item)}">
+      <img src="${esc(item.img)}" alt="">${quantity > 1 ? `<span class="ww-peek-qty">${quantity}</span>` : ""}
+    </span>`;
+  });
+  if ( contents.length > shown.length ) slots.push(`<span class="ww-peek-more">+${contents.length - shown.length}</span>`);
+
+  const peek = document.createElement("div");
+  peek.className = "ww-peek";
+  peek.setAttribute("role", "tooltip");
+  peek.innerHTML = `
+    <div class="ww-peek-head">
+      <span class="ww-peek-name">${esc(bag.name)}</span>
+      <span class="ww-peek-count">${contents.length ? game.i18n.format("WITCHWIND.PeekCount", { count: contents.length }) : t("PeekEmpty")}</span>
+    </div>
+    ${slots.length ? `<div class="ww-peek-grid">${slots.join("")}</div>` : ""}`;
+  document.body.append(peek);
+  for ( const img of peek.querySelectorAll("img") ) fitPicture(img);
+
+  // Below the bag, kept inside the window's edges.
+  const anchorBox = anchor.getBoundingClientRect();
+  const box = peek.getBoundingClientRect();
+  const left = Math.min(Math.max(8, anchorBox.left), window.innerWidth - box.width - 8);
+  const below = anchorBox.bottom + 6;
+  const top = (below + box.height > window.innerHeight - 8) ? Math.max(8, anchorBox.top - box.height - 6) : below;
+  peek.style.left = `${left}px`;
+  peek.style.top = `${top}px`;
+}
+
+function hideBagPeek() {
+  for ( const peek of document.querySelectorAll("body > .ww-peek") ) peek.remove();
+}
+
+/* -------------------------------------------- */
+/*  Sounds                                      */
+/* -------------------------------------------- */
+
+let audioContext = null;
+
+/**
+ * Play a short sound made on the spot with Web Audio, so the module ships no sound files: a two-note clink
+ * for equipping, a scatter of small chimes for coins. Off unless the user turns on the Sounds setting, and
+ * scaled by Foundry's interface volume.
+ * @param {"equip"|"coins"} kind
+ */
+function playSound(kind) {
+  if ( !game.settings.get(MODULE_ID, "sounds") ) return;
+  let interfaceVolume = 0.5;
+  try { interfaceVolume = game.settings.get("core", "globalInterfaceVolume") ?? 0.5; } catch {}
+  const volume = 0.3 * interfaceVolume;
+  if ( volume <= 0 ) return;
+
+  audioContext ??= new AudioContext();
+  if ( audioContext.state === "suspended" ) audioContext.resume();
+  const now = audioContext.currentTime + 0.01;
+  if ( kind === "equip" ) {
+    chime(now, 1150, volume, 0.22);
+    chime(now + 0.045, 1720, volume * 0.6, 0.18);
+  } else if ( kind === "coins" ) {
+    for ( let i = 0; i < 6; i++ ) {
+      chime(now + (i * 0.045) + (Math.random() * 0.03), 2600 + (Math.random() * 1600), volume * (0.8 - (i * 0.1)), 0.12 + (Math.random() * 0.08));
+    }
+  }
+}
+
+/** A small metallic ping: a few bell-like partials with a quick attack and an exponential fade. */
+function chime(start, frequency, level, decay) {
+  const envelope = audioContext.createGain();
+  envelope.gain.setValueAtTime(0.0001, start);
+  envelope.gain.exponentialRampToValueAtTime(Math.max(level, 0.0002), start + 0.004);
+  envelope.gain.exponentialRampToValueAtTime(0.0001, start + decay);
+  envelope.connect(audioContext.destination);
+  for ( const [ratio, weight] of [[1, 1], [2.76, 0.45], [5.4, 0.2]] ) {
+    const tone = audioContext.createOscillator();
+    tone.type = "sine";
+    tone.frequency.value = frequency * ratio;
+    const partial = audioContext.createGain();
+    partial.gain.value = weight;
+    tone.connect(partial).connect(envelope);
+    tone.start(start);
+    tone.stop(start + decay + 0.05);
   }
 }
 
@@ -334,7 +572,13 @@ function injectControls(tab) {
 
   const controls = document.createElement("div");
   controls.className = "ww-view-controls";
+  const sorts = SORT_MODES.map(({ id, icon }) => {
+    const label = t(`Sort${id.capitalize()}`);
+    return `<button type="button" class="always-interactive" data-ww-sort="${id}" aria-label="${label}"
+                    data-tooltip="${label}"><i class="fa-solid ${icon}" inert></i></button>`;
+  }).join("");
   controls.innerHTML = `
+    <div class="ww-view-toggle ww-sort-toggle" role="group" aria-label="${t("SortGroup")}">${sorts}</div>
     <label class="ww-slot-size" data-tooltip="${t("SlotSize")}">
       <i class="fa-regular fa-square ww-icon-small" inert></i>
       <input type="range" class="always-interactive" min="${SLOT_MIN}" max="${SLOT_MAX}" step="${SLOT_STEP}"
@@ -364,6 +608,12 @@ function injectControls(tab) {
     button.addEventListener("click", event => {
       event.stopPropagation();
       game.settings.set(MODULE_ID, "view", event.currentTarget.dataset.wwView);
+    });
+  }
+  for ( const button of controls.querySelectorAll("[data-ww-sort]") ) {
+    button.addEventListener("click", event => {
+      event.stopPropagation();
+      game.settings.set(MODULE_ID, "sortMode", event.currentTarget.dataset.wwSort);
     });
   }
 }
@@ -1147,7 +1397,11 @@ function applySheetState(element) {
     slider.hidden = view !== "grid";
     slider.querySelector("input").value = size;
   }
-  for ( const id of GRID_TABS ) scheduleFill(element.querySelector(`.tab[data-tab="${id}"]`));
+  for ( const id of GRID_TABS ) {
+    const tab = element.querySelector(`.tab[data-tab="${id}"]`);
+    applySort(tab);
+    scheduleFill(tab);
+  }
 }
 
 /* -------------------------------------------- */
